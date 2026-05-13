@@ -18,12 +18,12 @@ const TopNavbar = () => {
           <input
             type="text"
             placeholder="Search companies, users."
-            className="px-5 py-1.3 bg-[#f8fafc] border border-slate-100 text-[13px] w-52 rounded-md placeholder:text-slate-450"
+            className="pl-7 pr-4 py-1.5 bg-[#f8fafc] border border-slate-100 text-[13px] w-50 rounded-md placeholder:text-slate-450"
           />
         </div>
 
-        <div className="bg-linear-to-r from-[#0a1a16] via-[#142e29] to-[#0a1a16] rounded-full flex items-center justify-center border border-white/5 shadow-inner">
-          <span className="text-[10px] px-2 py-0.8 font-black  text-[#ff9800] uppercase ">
+        <div className="bg-linear-to-r from-[rgb(10,26,22)] via-[#142e29] to-[#1a5546] rounded-full flex items-center justify-center border border-white/5 shadow-inner">
+          <span className="text-[10px] px-2.5 py-1 font-black  text-[#ff9800] uppercase ">
             Super Admin
           </span>
         </div>
