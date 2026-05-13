@@ -8,6 +8,11 @@ import {
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
+  Clock,
+  ShieldCheck,
+  UserPlus,
+  FileText,
+  Leaf,
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -102,28 +107,28 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-start">
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-6 flex justify-between items-center border-b border-slate-50">
+          <div className="p-4.5 flex justify-between items-center border-b border-slate-50">
             <h3 className="font-bold text-slate-900 text-sm">
               Recent Companies
             </h3>
-            <button className="text-[10px] font-bold  px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 transition-colors">
+            <button className="text-[11px] font-bold px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
               View All
             </button>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50/50 text-[10px] text-slate-400 font-bold tracking-wider">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-slate-50/50 text-[11px] text-slate-500 font-bold tracking-wider">
                 <tr>
-                  <th className="px-6 py-4">Company</th>
-                  <th className="px-6 py-4">Industry</th>
-                  <th className="px-6 py-4">Plan</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Users</th>
+                  <th className="px-4 py-3">Company</th>
+                  <th className="px-4 py-3">Industry</th>
+                  <th className="px-4 py-3 ">Plan</th>
+                  <th className="px-4 py-3 ">Status</th>
+                  <th className="px-4 py-3 ">Users</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-100">
                 {[
                   {
                     name: "Nexgen Steels",
@@ -132,7 +137,7 @@ const Dashboard = () => {
                     status: "Active",
                     users: "42",
                     initial: "N",
-                    color: "bg-teal-50 text-teal-700",
+                    color: "bg-teal-50 text-teal-600",
                   },
                   {
                     name: "GreenFleet Co.",
@@ -141,7 +146,7 @@ const Dashboard = () => {
                     status: "Active",
                     users: "18",
                     initial: "G",
-                    color: "bg-blue-50 text-blue-700",
+                    color: "bg-blue-50 text-blue-600",
                   },
                   {
                     name: "SolarEdge Pvt.",
@@ -150,45 +155,77 @@ const Dashboard = () => {
                     status: "Active",
                     users: "11",
                     initial: "S",
-                    color: "bg-orange-50 text-orange-700",
+                    color: "bg-orange-50 text-orange-600",
+                  },
+                  {
+                    name: "RetailCore Inc.",
+                    ind: "Retail",
+                    plan: "Starter",
+                    status: "Trial",
+                    users: "6",
+                    initial: "R",
+                    color: "bg-purple-50 text-purple-600",
+                  },
+                  {
+                    name: "AquaTech Ltd.",
+                    ind: "Water Mgmt",
+                    plan: "Enterprise",
+                    status: "Active",
+                    users: "29",
+                    initial: "A",
+                    color: "bg-emerald-50 text-emerald-600",
                   },
                 ].map((row, i) => (
                   <tr
                     key={i}
-                    className="hover:bg-slate-50/50 transition-colors cursor-pointer"
+                    className="hover:bg-slate-50/30 transition-colors cursor-pointer"
                   >
-                    <td className="px-6 py-4 flex items-center gap-3">
+                    <td className="px-4 py-3 flex items-center gap-3">
                       <div
-                        className={`w-8 h-8 ${row.color} rounded-lg flex items-center justify-center font-bold text-xs shadow-sm`}
+                        className={`w-9 h-9 ${row.color} rounded-xl flex items-center justify-center font-bold text-sm shadow-sm`}
                       >
                         {row.initial}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-800">
+                        <p className="text-xs font-bold text-slate-800 leading-none mb-1">
                           {row.name}
                         </p>
-                        <p className="text-[10px] text-slate-400 italic">
+                        <p className="text-[10px] text-slate-400 font-medium">
                           {row.ind}
                         </p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs text-slate-500 font-medium">
+                    <td className="px-6 py-5 text-xs text-slate-500 font-medium">
                       {row.ind}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 text-center">
                       <span
-                        className={`text-[9px] px-2 py-1 rounded-md font-black uppercase tracking-tighter ${row.plan === "Enterprise" ? "bg-slate-900 text-white" : "bg-teal-50 text-teal-600 border border-teal-100"}`}
+                        className={`text-[9px] px-2.5 py-1 rounded-md font-bold uppercase tracking-tight ${
+                          row.plan === "Enterprise"
+                            ? "bg-linear-to-r from-[rgb(10,26,22)] via-[#142e29] to-[#1a5546] text-[#ff9800]"
+                            : row.plan === "Pro"
+                              ? "bg-teal-50 text-teal-600"
+                              : "bg-slate-100 text-slate-500"
+                        }`}
                       >
                         {row.plan}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="text-teal-600 text-[10px] font-bold flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse"></span>{" "}
+                    <td className="px-6 py-5 text-center">
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded-full ${
+                          row.status === "Active"
+                            ? "bg-emerald-50 text-emerald-600"
+                            : "bg-amber-50 text-amber-600"
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${row.status === "Active" ? "bg-emerald-500" : "bg-amber-500"}`}
+                        ></span>
                         {row.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs font-bold text-slate-700">
+                    <td className="px-6 py-5 text-center text-xs font-bold text-slate-700">
                       {row.users}
                     </td>
                   </tr>
@@ -198,63 +235,120 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Platform Health - Takes 1 col */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-          <h3 className="font-bold text-slate-900 text-sm mb-8">
-            Platform Health
-          </h3>
-          <div className="space-y-7">
-            {[
-              {
-                label: "API Uptime",
-                val: "99.98%",
-                color: "bg-teal-500",
-                w: "99%",
-              },
-              {
-                label: "Data Processing",
-                val: "94%",
-                color: "bg-blue-500",
-                w: "94%",
-              },
-              {
-                label: "Storage Used",
-                val: "67%",
-                color: "bg-orange-400",
-                w: "67%",
-              },
-              {
-                label: "Onboarding Rate",
-                val: "82%",
-                color: "bg-emerald-500",
-                w: "82%",
-              },
-            ].map((h, i) => (
-              <div key={i}>
-                <div className="flex justify-between text-[11px] font-bold mb-2">
-                  <span className="text-slate-500">{h.label}</span>
-                  <span className="text-slate-900">{h.val}</span>
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+            <h3 className="font-bold text-slate-900 text-sm mb-6">
+              Platform Health
+            </h3>
+            <div className="space-y-6">
+              {[
+                {
+                  label: "API Uptime",
+                  val: "99.98%",
+                  color: "bg-teal-500",
+                  w: "99.98%",
+                },
+                {
+                  label: "Data Processing",
+                  val: "94%",
+                  color: "bg-blue-600",
+                  w: "94%",
+                },
+                {
+                  label: "Storage Used",
+                  val: "67%",
+                  color: "bg-orange-500",
+                  w: "67%",
+                },
+                {
+                  label: "Onboarding Rate",
+                  val: "82%",
+                  color: "bg-emerald-500",
+                  w: "82%",
+                },
+              ].map((h, i) => (
+                <div key={i}>
+                  <div className="flex justify-between text-[11px]  mb-2">
+                    <span className="text-slate-900">{h.label}</span>
+                    <span className="text-slate-800 font-bold">{h.val}</span>
+                  </div>
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${h.color} transition-all duration-1000`}
+                      style={{ width: h.w }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="h-1.5 bg-slate-100 rounded-full">
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+            <h3 className="font-bold text-slate-900 text-sm mb-6">
+              Recent Activity
+            </h3>
+            <div className="space-y-5">
+              {[
+                {
+                  t: "New company onboarded",
+                  s: "Nexgen Steels joined Enterprise plan",
+                  time: "12 min ago",
+                  color: "text-teal-500",
+                  bg: "bg-teal-50",
+                },
+                {
+                  t: "User role changed",
+                  s: "Priya S. promoted to Admin at GreenFleet",
+                  time: "1h ago",
+                  color: "text-blue-500",
+                  bg: "bg-blue-50",
+                },
+                {
+                  t: "Trial expiring",
+                  s: "RetailCore Inc. trial ends in 2 days",
+                  time: "3h ago",
+                  color: "text-orange-500",
+                  bg: "bg-orange-50",
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex gap-4 pb-3 border-b border-slate-200 last:border-0 last:pb-0"
+                >
                   <div
-                    className={`h-full ${h.color} rounded-full transition-all duration-1000`}
-                    style={{ width: h.w }}
-                  ></div>
+                    className={`w-8 h-8 ${item.bg} rounded-full flex items-center justify-center shrink-0`}
+                  >
+                    <Clock size={14} className={item.color} />
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-bold text-slate-800">
+                      {item.t}
+                    </p>
+                    <p className="text-[12px] text-slate-700 mt-0.5 leading-tight">
+                      {item.s}
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      {item.time}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-          <h3 className="font-bold text-slate-900 text-sm mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+          <h3 className="font-bold text-slate-900 text-sm mb-8">
             Companies by Plan
           </h3>
-          <div className="flex items-center gap-8">
-            <div className="relative w-28 h-28 shrink-0">
-              <svg className="w-full h-full" viewBox="0 0 36 36">
+          <div className="flex items-center gap-6">
+            <div className="relative w-24 h-24 shrink-0">
+              <svg
+                className="w-full h-full transform -rotate-90"
+                viewBox="0 0 36 36"
+              >
                 <circle
                   cx="18"
                   cy="18"
@@ -263,122 +357,129 @@ const Dashboard = () => {
                   stroke="#f1f5f9"
                   strokeWidth="4"
                 ></circle>
+
                 <circle
                   cx="18"
                   cy="18"
                   r="15.9"
                   fill="transparent"
-                  stroke="#0f172a"
+                  stroke="#B2E2D5"
                   strokeWidth="4"
-                  strokeDasharray="50 100"
-                  strokeDashoffset="25"
+                  strokeDasharray="15 100"
+                  strokeDashoffset="0"
                 ></circle>
+
                 <circle
                   cx="18"
                   cy="18"
                   r="15.9"
                   fill="transparent"
-                  stroke="#2dd4bf"
+                  stroke="#4FD1C5"
                   strokeWidth="4"
                   strokeDasharray="35 100"
-                  strokeDashoffset="75"
+                  strokeDashoffset="-15"
+                ></circle>
+
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.9"
+                  fill="transparent"
+                  stroke="#2D9A8F"
+                  strokeWidth="4"
+                  strokeDasharray="50 100"
+                  strokeDashoffset="-50"
                 ></circle>
               </svg>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
-                <span className="w-2 h-2 bg-slate-900 rounded-full"></span>{" "}
-                Enterprise <span className="ml-auto text-slate-400">50%</span>
-              </div>
-              <div className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
-                <span className="w-2 h-2 bg-teal-400 rounded-full"></span> Pro{" "}
-                <span className="ml-auto text-slate-400">35%</span>
-              </div>
-              <div className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
-                <span className="w-2 h-2 bg-slate-200 rounded-full"></span>{" "}
-                Starter <span className="ml-auto text-slate-400">15%</span>
-              </div>
+
+            <div className="flex-1 space-y-4">
+              {[
+                { label: "Enterprise", val: "50%", color: "bg-[#2D9A8F]" },
+                { label: "Pro", val: "35%", color: "bg-[#4FD1C5]" },
+                { label: "Starter", val: "15%", color: "bg-[#B2E2D5]" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-2.5 h-2.5 ${item.color} rounded-md`}
+                    ></span>
+                    <span className="text-xs font-semibold text-slate-600">
+                      {item.label}
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-slate-500">
+                    {item.val}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-          <h3 className="font-bold text-slate-900 text-sm mb-6">
-            Recent Activity
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+          <h3 className="font-bold text-slate-900 text-sm mb-4">
+            Subscription Status
           </h3>
-          <div className="space-y-6">
+          <div className="space-y-3 ">
             {[
               {
-                t: "New company onboarded",
-                s: "Nexgen Steels joined Enterprise plan",
-                time: "12 min ago",
-                bg: "bg-teal-50",
-                icon: <Plus size={14} className="text-teal-600" />,
+                label: "Active",
+                count: 128,
+                color: "bg-emerald-500",
+                w: "70%",
               },
-              {
-                t: "User role changed",
-                s: "Priya S. promoted to Admin at GreenFleet",
-                time: "1h ago",
-                bg: "bg-blue-50",
-                icon: <Users size={14} className="text-blue-600" />,
-              },
-              {
-                t: "Trial expiring",
-                s: "RetailCore Inc. trial ends in 2 days",
-                time: "3h ago",
-                bg: "bg-orange-50",
-                icon: <Calendar size={14} className="text-orange-600" />,
-              },
-            ].map((item, i) => (
-              <div key={i} className="flex gap-4 relative">
-                {i !== 2 && (
-                  <div className="absolute left-4 top-8 w-px h-6 bg-slate-100"></div>
-                )}
-                <div
-                  className={`w-8 h-8 ${item.bg} rounded-lg flex items-center justify-center shrink-0`}
-                >
-                  {item.icon}
+              { label: "Trial", count: 14, color: "bg-amber-400", w: "15%" },
+              { label: "Suspended", count: 4, color: "bg-rose-400", w: "5%" },
+              { label: "Churned", count: 2, color: "bg-slate-200", w: "3%" },
+            ].map((status, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between group py-2  border-b border-slate-200 last:border-0 last:pb-0  "
+              >
+                <span className="text-xs font-semibold text-slate-600 w-35">
+                  {status.label}
+                </span>
+                <div className="flex-1 h-1.5 bg-slate-50 rounded-full  overflow-hidden">
+                  <div
+                    className={`h-full ${status.color} rounded-full`}
+                    style={{ width: status.w }}
+                  ></div>
                 </div>
-                <div>
-                  <p className="text-[11px] font-black text-slate-800">
-                    {item.t}
-                  </p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{item.s}</p>
-                  <p className="text-[9px] text-slate-300 mt-1">{item.time}</p>
-                </div>
+                <span className="text-xs font-bold text-slate-900 w-8 text-right">
+                  {status.count}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-          <h3 className="font-bold text-slate-900 text-sm mb-6">
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+          <h3 className="font-bold text-slate-900 text-sm mb-2">
             Quick Actions
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {[
-              { label: "Add New Company", icon: <Building2 size={16} /> },
-              { label: "Invite Admin User", icon: <Users size={16} /> },
-              { label: "View Audit Logs", icon: <Calendar size={16} /> },
-              { label: "Emissions Report", icon: <Smile size={16} /> },
+              { label: "Add New Company", icon: <ShieldCheck size={18} /> },
+              { label: "Invite Admin User", icon: <UserPlus size={18} /> },
+              { label: "View Audit Logs", icon: <FileText size={18} /> },
+              { label: "Emissions Report", icon: <Leaf size={18} /> },
             ].map((action, i) => (
               <div
                 key={i}
-                className="group flex items-center justify-between p-3.5 border border-slate-50 rounded-xl hover:bg-slate-50 cursor-pointer transition-all"
+                className="group flex items-center justify-between py-1 px-2 rounded-xl hover:bg-slate-50 cursor-pointer transition-all"
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-50 group-hover:bg-white rounded-lg text-teal-600 transition-colors shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="p-2.5 bg-teal-50/50 text-teal-600 rounded-xl group-hover:bg-teal-50 transition-colors">
                     {action.icon}
                   </div>
-                  <span className="text-[11px] font-bold text-slate-700">
+                  <span className="text-xs font-bold text-slate-700">
                     {action.label}
                   </span>
                 </div>
                 <ChevronRight
                   size={14}
-                  className="text-slate-300 group-hover:text-teal-600 transition-colors"
+                  className="text-slate-300 group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all"
                 />
               </div>
             ))}
