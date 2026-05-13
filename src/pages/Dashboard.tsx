@@ -12,21 +12,21 @@ import {
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-6">
+    <div className="min-h-screen bg-[#f8fafc] ">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">
             Platform Overview
           </h1>
-          <p className="text-[11px] text-slate-400 font-medium mt-1">
+          <p className="text-[13px] text-slate-400 font-medium mt-1">
             Real-time insights across all companies and users
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="bg-white border border-slate-200 px-4 py-2 rounded-lg text-[11px] font-bold text-slate-600 flex items-center gap-2 shadow-sm">
+          <button className=" border border-slate-200 px-4 py-2 rounded-lg text-[11px] font-bold text-slate-600 flex items-center gap-2 ">
             <Calendar size={14} /> Jan 2024 - Dec 2024
           </button>
-          <button className="bg-[#14b8a6] hover:bg-[#0d9488] text-white px-4 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 shadow-sm transition-all">
+          <button className="bg-[#0d9488] hover:bg-[#0c8379] text-white px-4 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 shadow-sm transition-all">
             <Plus size={16} /> Add Company
           </button>
         </div>
@@ -76,20 +76,21 @@ const Dashboard = () => {
             key={i}
             className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden"
           >
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                {s.label}
+              </p>
+              <p className="text-[9px] text-slate-400 mt-0.5">{s.sub}</p>
+            </div>
+
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  {s.label}
-                </p>
-                <p className="text-[9px] text-slate-400 mt-0.5">{s.sub}</p>
-              </div>
+              <p className="text-2xl font-black text-slate-900 mb-2">{s.val}</p>
               <div className={`p-2.5 ${s.bg} rounded-xl text-slate-600`}>
                 {s.icon}
               </div>
             </div>
-            <p className="text-2xl font-black text-slate-900 mb-2">{s.val}</p>
             <p
-              className={`text-[10px] font-bold flex items-center gap-1 ${s.color}`}
+              className={`text-[10px] font-bold flex items-center gap-1 text-emerald-600`}
             >
               {s.trend.startsWith("+") ? (
                 <ArrowUpRight size={12} />
@@ -102,15 +103,13 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* 3. Middle Section: Table & Health Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Recent Companies - Takes 2 cols */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-6 flex justify-between items-center border-b border-slate-50">
             <h3 className="font-bold text-slate-900 text-sm">
               Recent Companies
             </h3>
-            <button className="text-[10px] font-bold bg-slate-50 hover:bg-slate-100 px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 transition-colors">
+            <button className="text-[10px] font-bold  px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 transition-colors">
               View All
             </button>
           </div>
