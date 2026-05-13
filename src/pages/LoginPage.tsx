@@ -15,9 +15,9 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 font-['Poppins']">
       <div className="bg-white rounded-[20px] p-10 w-full max-w-105 shadow-xl border border-slate-100">
         <div className="flex items-center gap-2 mb-8">
-          <div className="text-teal-500 font-bold text-xl tracking-widest flex items-center gap-2">
+          <div className="text-slate-800 font-bold text-sm tracking-widest flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center">
-              <img src="/src/assets/logo.png" alt="" />
+              <img src="/logo.png" alt="" />
             </div>
             URIMPACT
           </div>

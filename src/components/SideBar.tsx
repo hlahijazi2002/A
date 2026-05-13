@@ -59,7 +59,7 @@ const Sidebar = () => {
     <aside className="w-60 h-screen bg-slate-50 border-r border-slate-200 flex flex-col font-sans">
       <div className="p-4 flex items-center justify-between border-b border-slate-200/60">
         <div className=" flex items-center gap-1">
-          <img className="w-8 h-8" src="/src/assets/logo.png" alt="logo" />
+          <img className="w-8 h-8" src="/logo.png" alt="logo" />
           <span className="font-bold text-slate-800 text-sm tracking-tight">
             URIMPACT
           </span>
