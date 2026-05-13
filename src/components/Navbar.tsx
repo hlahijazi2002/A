@@ -1,6 +1,7 @@
 import { Search, Bell } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const TopNavbar = () => {
+const Navbar = () => {
   return (
     <div className="h-14 bg-white flex items-center justify-between px-6 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-1.5 text-[12px] whitespace-nowrap">
@@ -27,11 +28,12 @@ const TopNavbar = () => {
             Super Admin
           </span>
         </div>
-
-        <div className="relative cursor-pointer px-1">
-          <Bell size={18} className="text-slate-500" />
-          <span className="absolute top-0 right-0.5 w-1.5 h-1.5 bg-[#ef4444] rounded-full border border-white"></span>
-        </div>
+        <Link to="/notifications">
+          <div className="relative cursor-pointer px-1">
+            <Bell size={18} className="text-slate-500" />
+            <span className="absolute top-0 right-0.5 w-1.5 h-1.5 bg-[#ef4444] rounded-full border border-white"></span>
+          </div>
+        </Link>
 
         <div className="w-8 h-8 bg-[#0b9181] rounded-full flex items-center justify-center text-white text-[11px] font-bold cursor-pointer">
           SA
@@ -41,4 +43,4 @@ const TopNavbar = () => {
   );
 };
 
-export default TopNavbar;
+export default Navbar;

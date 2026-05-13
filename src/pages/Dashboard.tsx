@@ -14,8 +14,26 @@ import {
   FileText,
   Leaf,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  dashboardStats,
+  companies,
+  platformHealth,
+  recentActivity,
+  companiesByPlan,
+  subscriptionStatus,
+} from "../../data/data";
+
+const statIcons = [
+  <Building2 size={18} />,
+  <Users size={18} />,
+  <DollarSign size={18} />,
+  <Smile size={18} className="text-orange-400" />,
+];
 
 const Dashboard = () => {
+  const recentCompanies = companies.slice(0, 5);
+
   return (
     <div className="min-h-screen bg-[#f8fafc] ">
       <div className="flex justify-between items-center mb-8">
@@ -38,44 +56,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          {
-            label: "Total Companies",
-            val: "148",
-            sub: "Active on platform",
-            trend: "+12 this month",
-            color: "text-teal-600",
-            bg: "bg-teal-50",
-            icon: <Building2 size={18} />,
-          },
-          {
-            label: "Total Active Users",
-            val: "2,341",
-            sub: "Across all companies",
-            trend: "+8.4% vs last month",
-            color: "text-blue-600",
-            bg: "bg-blue-50",
-            icon: <Users size={18} />,
-          },
-          {
-            label: "Platform MRR",
-            val: "$84,200",
-            sub: "Monthly recurring revenue",
-            trend: "+14.2% vs last month",
-            color: "text-emerald-600",
-            bg: "bg-emerald-50",
-            icon: <DollarSign size={18} />,
-          },
-          {
-            label: "Total Emissions Tracked",
-            val: "1.84M",
-            sub: "tCO2e across platform",
-            trend: "-6.7% reduction vs 2023",
-            color: "text-teal-600",
-            bg: "bg-orange-50",
-            icon: <Smile size={18} className="text-orange-400" />,
-          },
-        ].map((s, i) => (
+        {dashboardStats.map((s, i) => (
           <div
             key={i}
             className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden"
@@ -90,7 +71,7 @@ const Dashboard = () => {
             <div className="flex justify-between items-start mb-4">
               <p className="text-2xl font-black text-slate-900 mb-2">{s.val}</p>
               <div className={`p-2.5 ${s.bg} rounded-xl text-slate-600`}>
-                {s.icon}
+                {statIcons[i]}
               </div>
             </div>
             <p
@@ -113,9 +94,12 @@ const Dashboard = () => {
             <h3 className="font-bold text-slate-900 text-sm">
               Recent Companies
             </h3>
-            <button className="text-[11px] font-bold px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            <Link
+              to="/companies"
+              className="text-[11px] font-bold px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors inline-block"
+            >
               View All
-            </button>
+            </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -129,53 +113,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {[
-                  {
-                    name: "Nexgen Steels",
-                    ind: "Manufacturing",
-                    plan: "Enterprise",
-                    status: "Active",
-                    users: "42",
-                    initial: "N",
-                    color: "bg-teal-50 text-teal-600",
-                  },
-                  {
-                    name: "GreenFleet Co.",
-                    ind: "Logistics",
-                    plan: "Pro",
-                    status: "Active",
-                    users: "18",
-                    initial: "G",
-                    color: "bg-blue-50 text-blue-600",
-                  },
-                  {
-                    name: "SolarEdge Pvt.",
-                    ind: "Energy",
-                    plan: "Pro",
-                    status: "Active",
-                    users: "11",
-                    initial: "S",
-                    color: "bg-orange-50 text-orange-600",
-                  },
-                  {
-                    name: "RetailCore Inc.",
-                    ind: "Retail",
-                    plan: "Starter",
-                    status: "Trial",
-                    users: "6",
-                    initial: "R",
-                    color: "bg-purple-50 text-purple-600",
-                  },
-                  {
-                    name: "AquaTech Ltd.",
-                    ind: "Water Mgmt",
-                    plan: "Enterprise",
-                    status: "Active",
-                    users: "29",
-                    initial: "A",
-                    color: "bg-emerald-50 text-emerald-600",
-                  },
-                ].map((row, i) => (
+                {recentCompanies.map((row, i) => (
                   <tr
                     key={i}
                     className="hover:bg-slate-50/30 transition-colors cursor-pointer"
@@ -241,32 +179,7 @@ const Dashboard = () => {
               Platform Health
             </h3>
             <div className="space-y-6">
-              {[
-                {
-                  label: "API Uptime",
-                  val: "99.98%",
-                  color: "bg-teal-500",
-                  w: "99.98%",
-                },
-                {
-                  label: "Data Processing",
-                  val: "94%",
-                  color: "bg-blue-600",
-                  w: "94%",
-                },
-                {
-                  label: "Storage Used",
-                  val: "67%",
-                  color: "bg-orange-500",
-                  w: "67%",
-                },
-                {
-                  label: "Onboarding Rate",
-                  val: "82%",
-                  color: "bg-emerald-500",
-                  w: "82%",
-                },
-              ].map((h, i) => (
+              {platformHealth.map((h, i) => (
                 <div key={i}>
                   <div className="flex justify-between text-[11px]  mb-2">
                     <span className="text-slate-900">{h.label}</span>
@@ -288,29 +201,7 @@ const Dashboard = () => {
               Recent Activity
             </h3>
             <div className="space-y-5">
-              {[
-                {
-                  t: "New company onboarded",
-                  s: "Nexgen Steels joined Enterprise plan",
-                  time: "12 min ago",
-                  color: "text-teal-500",
-                  bg: "bg-teal-50",
-                },
-                {
-                  t: "User role changed",
-                  s: "Priya S. promoted to Admin at GreenFleet",
-                  time: "1h ago",
-                  color: "text-blue-500",
-                  bg: "bg-blue-50",
-                },
-                {
-                  t: "Trial expiring",
-                  s: "RetailCore Inc. trial ends in 2 days",
-                  time: "3h ago",
-                  color: "text-orange-500",
-                  bg: "bg-orange-50",
-                },
-              ].map((item, i) => (
+              {recentActivity.map((item, i) => (
                 <div
                   key={i}
                   className="flex gap-4 pb-3 border-b border-slate-200 last:border-0 last:pb-0"
@@ -357,7 +248,6 @@ const Dashboard = () => {
                   stroke="#f1f5f9"
                   strokeWidth="4"
                 ></circle>
-
                 <circle
                   cx="18"
                   cy="18"
@@ -368,7 +258,6 @@ const Dashboard = () => {
                   strokeDasharray="15 100"
                   strokeDashoffset="0"
                 ></circle>
-
                 <circle
                   cx="18"
                   cy="18"
@@ -379,7 +268,6 @@ const Dashboard = () => {
                   strokeDasharray="35 100"
                   strokeDashoffset="-15"
                 ></circle>
-
                 <circle
                   cx="18"
                   cy="18"
@@ -394,11 +282,7 @@ const Dashboard = () => {
             </div>
 
             <div className="flex-1 space-y-4">
-              {[
-                { label: "Enterprise", val: "50%", color: "bg-[#2D9A8F]" },
-                { label: "Pro", val: "35%", color: "bg-[#4FD1C5]" },
-                { label: "Starter", val: "15%", color: "bg-[#B2E2D5]" },
-              ].map((item, i) => (
+              {companiesByPlan.map((item, i) => (
                 <div key={i} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span
@@ -422,17 +306,7 @@ const Dashboard = () => {
             Subscription Status
           </h3>
           <div className="space-y-3 ">
-            {[
-              {
-                label: "Active",
-                count: 128,
-                color: "bg-emerald-500",
-                w: "70%",
-              },
-              { label: "Trial", count: 14, color: "bg-amber-400", w: "15%" },
-              { label: "Suspended", count: 4, color: "bg-rose-400", w: "5%" },
-              { label: "Churned", count: 2, color: "bg-slate-200", w: "3%" },
-            ].map((status, i) => (
+            {subscriptionStatus.map((status, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between group py-2  border-b border-slate-200 last:border-0 last:pb-0  "

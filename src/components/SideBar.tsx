@@ -1,3 +1,4 @@
+import { Link, NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   BarChart3,
@@ -17,42 +18,59 @@ const Sidebar = () => {
       title: "Dashboard",
       icon: <LayoutDashboard size={18} />,
       section: "OVERVIEW",
+      path: "/dashboard",
       active: true,
     },
     {
       title: "Emissions Analytics",
       icon: <BarChart3 size={18} />,
       section: "OVERVIEW",
+      path: "/analytics",
     },
     {
       title: "Company Management",
       icon: <Building2 size={18} />,
       section: "MANAGEMENT",
+      path: "/companies",
     },
     {
       title: "User & Access",
       icon: <Users size={18} />,
       section: "MANAGEMENT",
+      path: "/users",
     },
     {
       title: "Subscriptions",
       icon: <CreditCard size={18} />,
       section: "MANAGEMENT",
       badge: 3,
+      path: "/subscription",
     },
     {
       title: "Partner Management",
       icon: <Handshake size={18} />,
       section: "MANAGEMENT",
+      path: "/partners",
     },
-    { title: "Audit Logs", icon: <FileText size={18} />, section: "SYSTEM" },
+    {
+      title: "Audit Logs",
+      icon: <FileText size={18} />,
+      section: "SYSTEM",
+      path: "/logs",
+    },
     {
       title: "Notifications",
       icon: <Bell size={18} />,
       section: "SYSTEM",
       badge: 7,
+      path: "/notifications",
     },
-    { title: "Settings", icon: <Settings size={18} />, section: "SYSTEM" },
+    {
+      title: "Settings",
+      icon: <Settings size={18} />,
+      section: "SYSTEM",
+      path: "/settings",
+    },
   ];
 
   return (
@@ -78,26 +96,33 @@ const Sidebar = () => {
             {menuItems
               .filter((item) => item.section === section)
               .map((item) => (
-                <button
+                <NavLink
                   key={item.title}
-                  className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-all mb-0.5 ${
-                    item.active
-                      ? "bg-[#008080] text-white shadow-sm"
-                      : "text-slate-500 hover:bg-slate-200 hover:text-slate-900"
-                  }`}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-all mb-0.5 ${
+                      isActive
+                        ? "bg-[#008080] text-white shadow-sm"
+                        : "text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                    }`
+                  }
                 >
-                  <span
-                    className={item.active ? "text-white" : "text-slate-400"}
-                  >
-                    {item.icon}
-                  </span>
-                  <span className="text-xs font-medium">{item.title}</span>
-                  {item.badge && (
-                    <span className="ml-auto bg-amber-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
-                      {item.badge}
-                    </span>
+                  {({ isActive }) => (
+                    <>
+                      <span
+                        className={isActive ? "text-white" : "text-slate-400"}
+                      >
+                        {item.icon}
+                      </span>
+                      <span className="text-xs font-medium">{item.title}</span>
+                      {item.badge && (
+                        <span className="ml-auto bg-amber-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
                   )}
-                </button>
+                </NavLink>
               ))}
           </div>
         ))}
@@ -116,10 +141,13 @@ const Sidebar = () => {
               Platform Admin
             </p>
           </div>
-          <LogOut
-            size={14}
-            className="text-slate-400 cursor-pointer hover:text-red-500"
-          />
+
+          <Link to="/login">
+            <LogOut
+              size={14}
+              className="text-slate-400 cursor-pointer hover:text-red-500"
+            />
+          </Link>
         </div>
       </div>
     </aside>
