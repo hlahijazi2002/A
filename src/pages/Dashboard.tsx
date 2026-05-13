@@ -32,7 +32,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* 2. Stats Cards Grid - 4 Columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           {
@@ -103,7 +102,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-6 flex justify-between items-center border-b border-slate-50">
             <h3 className="font-bold text-slate-900 text-sm">
@@ -115,7 +114,7 @@ const Dashboard = () => {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-slate-50/50 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+              <thead className="bg-slate-50/50 text-[10px] text-slate-400 font-bold tracking-wider">
                 <tr>
                   <th className="px-6 py-4">Company</th>
                   <th className="px-6 py-4">Industry</th>
@@ -248,9 +247,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* 4. Bottom Section: Charts & Activity - مطابق لصور image_1e8e98 و image_1e8bee */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Companies by Plan (Donut Chart) */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
           <h3 className="font-bold text-slate-900 text-sm mb-6">
             Companies by Plan
