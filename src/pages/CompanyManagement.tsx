@@ -106,6 +106,10 @@ const CompanyManagement = () => {
                   className="hover:bg-slate-50/50 transition-colors group"
                 >
                   <td className="px-6 py-4">
+                    <Link
+                      to="/companyProfile"
+                      className="absolute inset-0 z-10"
+                    />
                     <input
                       type="checkbox"
                       className="rounded border-slate-300 text-teal-600"

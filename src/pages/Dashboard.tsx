@@ -354,7 +354,7 @@ const Dashboard = () => {
               {
                 label: "Invite Admin User",
                 icon: <UserPlus size={18} />,
-                path: "/dashboard",
+                path: "/users",
               },
               {
                 label: "View Audit Logs",

@@ -188,7 +188,7 @@ export const dashboardStats: DashboardStat[] = [
     trend: "+14.2% vs last month",
     color: "text-emerald-600",
     bg: "bg-emerald-50",
-    path: "/partners",
+    path: "/dashboard",
   },
   {
     label: "Total Emissions Tracked",
