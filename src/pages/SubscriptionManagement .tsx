@@ -61,13 +61,7 @@ const PlanCard = ({ plan }: { plan: SubscriptionPlan }) => (
     <p className="text-[15px] font-bold text-slate-800 mb-2">{plan.name}</p>
 
     <div className="flex items-end gap-1 mb-1">
-      <span
-        className={`font-black tracking-tight leading-none ${
-          plan.price === "Custom"
-            ? "text-4xl text-slate-800"
-            : "text-3xl text-[#0d9488]"
-        }`}
-      >
+      <span className={`font-black tracking-tight leading-none  `}>
         {plan.price}
       </span>
       {plan.period && (
