@@ -49,42 +49,47 @@ const Dashboard = () => {
           <button className=" border border-slate-200 px-4 py-2 rounded-lg text-[11px] font-bold text-slate-600 flex items-center gap-2 ">
             <Calendar size={14} /> Jan 2024 - Dec 2024
           </button>
-          <button className="bg-[#0d9488] hover:bg-[#0c8379] text-white px-4 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 shadow-sm transition-all">
+
+          <Link
+            to="/addCompany"
+            className="bg-[#0d9488] hover:bg-[#0c8379] text-white px-4 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 shadow-sm transition-all"
+          >
             <Plus size={16} /> Add Company
-          </button>
+          </Link>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {dashboardStats.map((s, i) => (
-          <div
-            key={i}
-            className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden"
-          >
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                {s.label}
-              </p>
-              <p className="text-[9px] text-slate-400 mt-0.5">{s.sub}</p>
-            </div>
-
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-2xl font-black text-slate-900 mb-2">{s.val}</p>
-              <div className={`p-2.5 ${s.bg} rounded-xl text-slate-600`}>
-                {statIcons[i]}
+          <Link key={i} to={s.path}>
+            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  {s.label}
+                </p>
+                <p className="text-[9px] text-slate-400 mt-0.5">{s.sub}</p>
               </div>
+
+              <div className="flex justify-between items-start mb-4">
+                <p className="text-2xl font-black text-slate-900 mb-2">
+                  {s.val}
+                </p>
+                <div className={`p-2.5 ${s.bg} rounded-xl text-slate-600`}>
+                  {statIcons[i]}
+                </div>
+              </div>
+              <p
+                className={`text-[10px] font-bold flex items-center gap-1 text-emerald-600`}
+              >
+                {s.trend.startsWith("+") ? (
+                  <ArrowUpRight size={12} />
+                ) : (
+                  <ArrowDownRight size={12} />
+                )}
+                {s.trend}
+              </p>
             </div>
-            <p
-              className={`text-[10px] font-bold flex items-center gap-1 text-emerald-600`}
-            >
-              {s.trend.startsWith("+") ? (
-                <ArrowUpRight size={12} />
-              ) : (
-                <ArrowDownRight size={12} />
-              )}
-              {s.trend}
-            </p>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -116,15 +121,19 @@ const Dashboard = () => {
                 {recentCompanies.map((row, i) => (
                   <tr
                     key={i}
-                    className="hover:bg-slate-50/30 transition-colors cursor-pointer"
+                    className="hover:bg-slate-50/30 transition-colors cursor-pointer relative"
                   >
                     <td className="px-4 py-3 flex items-center gap-3">
+                      <Link
+                        to="/companyProfile"
+                        className="absolute inset-0 z-10"
+                      />
                       <div
-                        className={`w-9 h-9 ${row.color} rounded-xl flex items-center justify-center font-bold text-sm shadow-sm`}
+                        className={`w-9 h-9 ${row.color} rounded-xl flex items-center justify-center font-bold text-sm shadow-sm relative z-0`}
                       >
                         {row.initial}
                       </div>
-                      <div>
+                      <div className="relative z-0">
                         <p className="text-xs font-bold text-slate-800 leading-none mb-1">
                           {row.name}
                         </p>
@@ -133,10 +142,10 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-xs text-slate-500 font-medium">
+                    <td className="px-6 py-5 text-xs text-slate-500 font-medium relative z-0">
                       {row.ind}
                     </td>
-                    <td className="px-6 py-5 text-center">
+                    <td className="px-6 py-5 text-center relative z-0">
                       <span
                         className={`text-[9px] px-2.5 py-1 rounded-md font-bold uppercase tracking-tight ${
                           row.plan === "Enterprise"
@@ -149,7 +158,7 @@ const Dashboard = () => {
                         {row.plan}
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-center">
+                    <td className="px-6 py-5 text-center relative z-0">
                       <span
                         className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded-full ${
                           row.status === "Active"
@@ -163,7 +172,7 @@ const Dashboard = () => {
                         {row.status}
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-center text-xs font-bold text-slate-700">
+                    <td className="px-6 py-5 text-center text-xs font-bold text-slate-700 relative z-0">
                       {row.users}
                     </td>
                   </tr>
@@ -230,103 +239,106 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
-          <h3 className="font-bold text-slate-900 text-sm mb-8">
-            Companies by Plan
-          </h3>
-          <div className="flex items-center gap-6">
-            <div className="relative w-24 h-24 shrink-0">
-              <svg
-                className="w-full h-full transform -rotate-90"
-                viewBox="0 0 36 36"
-              >
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15.9"
-                  fill="transparent"
-                  stroke="#f1f5f9"
-                  strokeWidth="4"
-                ></circle>
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15.9"
-                  fill="transparent"
-                  stroke="#B2E2D5"
-                  strokeWidth="4"
-                  strokeDasharray="15 100"
-                  strokeDashoffset="0"
-                ></circle>
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15.9"
-                  fill="transparent"
-                  stroke="#4FD1C5"
-                  strokeWidth="4"
-                  strokeDasharray="35 100"
-                  strokeDashoffset="-15"
-                ></circle>
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15.9"
-                  fill="transparent"
-                  stroke="#2D9A8F"
-                  strokeWidth="4"
-                  strokeDasharray="50 100"
-                  strokeDashoffset="-50"
-                ></circle>
-              </svg>
-            </div>
+        <Link to="/companies">
+          <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+            <h3 className="font-bold text-slate-900 text-sm mb-8">
+              Companies by Plan
+            </h3>
+            <div className="flex items-center gap-6">
+              <div className="relative w-24 h-24 shrink-0">
+                <svg
+                  className="w-full h-full transform -rotate-90"
+                  viewBox="0 0 36 36"
+                >
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9"
+                    fill="transparent"
+                    stroke="#f1f5f9"
+                    strokeWidth="4"
+                  ></circle>
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9"
+                    fill="transparent"
+                    stroke="#B2E2D5"
+                    strokeWidth="4"
+                    strokeDasharray="15 100"
+                    strokeDashoffset="0"
+                  ></circle>
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9"
+                    fill="transparent"
+                    stroke="#4FD1C5"
+                    strokeWidth="4"
+                    strokeDasharray="35 100"
+                    strokeDashoffset="-15"
+                  ></circle>
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9"
+                    fill="transparent"
+                    stroke="#2D9A8F"
+                    strokeWidth="4"
+                    strokeDasharray="50 100"
+                    strokeDashoffset="-50"
+                  ></circle>
+                </svg>
+              </div>
 
-            <div className="flex-1 space-y-4">
-              {companiesByPlan.map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`w-2.5 h-2.5 ${item.color} rounded-md`}
-                    ></span>
-                    <span className="text-xs font-semibold text-slate-600">
-                      {item.label}
+              <div className="flex-1 space-y-4">
+                {companiesByPlan.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`w-2.5 h-2.5 ${item.color} rounded-md`}
+                      ></span>
+                      <span className="text-xs font-semibold text-slate-600">
+                        {item.label}
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold text-slate-500">
+                      {item.val}
                     </span>
                   </div>
-                  <span className="text-xs font-bold text-slate-500">
-                    {item.val}
+                ))}
+              </div>
+            </div>
+          </div>
+        </Link>
+        <Link to="/companies">
+          <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+            <h3 className="font-bold text-slate-900 text-sm mb-4">
+              Subscription Status
+            </h3>
+            <div className="space-y-3 ">
+              {subscriptionStatus.map((status, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between group py-2  border-b border-slate-200 last:border-0 last:pb-0  "
+                >
+                  <span className="text-xs font-semibold text-slate-600 w-35">
+                    {status.label}
+                  </span>
+                  <div className="flex-1 h-1.5 bg-slate-50 rounded-full  overflow-hidden">
+                    <div
+                      className={`h-full ${status.color} rounded-full`}
+                      style={{ width: status.w }}
+                    ></div>
+                  </div>
+                  <span className="text-xs font-bold text-slate-900 w-8 text-right">
+                    {status.count}
                   </span>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-          <h3 className="font-bold text-slate-900 text-sm mb-4">
-            Subscription Status
-          </h3>
-          <div className="space-y-3 ">
-            {subscriptionStatus.map((status, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between group py-2  border-b border-slate-200 last:border-0 last:pb-0  "
-              >
-                <span className="text-xs font-semibold text-slate-600 w-35">
-                  {status.label}
-                </span>
-                <div className="flex-1 h-1.5 bg-slate-50 rounded-full  overflow-hidden">
-                  <div
-                    className={`h-full ${status.color} rounded-full`}
-                    style={{ width: status.w }}
-                  ></div>
-                </div>
-                <span className="text-xs font-bold text-slate-900 w-8 text-right">
-                  {status.count}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+        </Link>
 
         <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
           <h3 className="font-bold text-slate-900 text-sm mb-2">
@@ -334,12 +346,29 @@ const Dashboard = () => {
           </h3>
           <div className="space-y-2">
             {[
-              { label: "Add New Company", icon: <ShieldCheck size={18} /> },
-              { label: "Invite Admin User", icon: <UserPlus size={18} /> },
-              { label: "View Audit Logs", icon: <FileText size={18} /> },
-              { label: "Emissions Report", icon: <Leaf size={18} /> },
+              {
+                label: "Add New Company",
+                icon: <ShieldCheck size={18} />,
+                path: "/addCompany",
+              },
+              {
+                label: "Invite Admin User",
+                icon: <UserPlus size={18} />,
+                path: "/dashboard",
+              },
+              {
+                label: "View Audit Logs",
+                icon: <FileText size={18} />,
+                path: "/logs",
+              },
+              {
+                label: "Emissions Report",
+                icon: <Leaf size={18} />,
+                path: "/analytics",
+              },
             ].map((action, i) => (
-              <div
+              <Link
+                to={action.path}
                 key={i}
                 className="group flex items-center justify-between py-1 px-2 rounded-xl hover:bg-slate-50 cursor-pointer transition-all"
               >
@@ -355,7 +384,7 @@ const Dashboard = () => {
                   size={14}
                   className="text-slate-300 group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all"
                 />
-              </div>
+              </Link>
             ))}
           </div>
         </div>

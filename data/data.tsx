@@ -159,6 +159,7 @@ export interface DashboardStat {
   trend: string;
   color: string;
   bg: string;
+  path: string;
 }
 
 export const dashboardStats: DashboardStat[] = [
@@ -169,6 +170,7 @@ export const dashboardStats: DashboardStat[] = [
     trend: "+12 this month",
     color: "text-teal-600",
     bg: "bg-teal-50",
+    path: "/companies",
   },
   {
     label: "Total Active Users",
@@ -177,6 +179,7 @@ export const dashboardStats: DashboardStat[] = [
     trend: "+8.4% vs last month",
     color: "text-blue-600",
     bg: "bg-blue-50",
+    path: "/users",
   },
   {
     label: "Platform MRR",
@@ -185,6 +188,7 @@ export const dashboardStats: DashboardStat[] = [
     trend: "+14.2% vs last month",
     color: "text-emerald-600",
     bg: "bg-emerald-50",
+    path: "/partners",
   },
   {
     label: "Total Emissions Tracked",
@@ -193,6 +197,7 @@ export const dashboardStats: DashboardStat[] = [
     trend: "-6.7% reduction vs 2023",
     color: "text-teal-600",
     bg: "bg-orange-50",
+    path: "/analytics",
   },
 ];
 
@@ -583,14 +588,16 @@ export const subscriptionPlans: SubscriptionPlan[] = [
   {
     id: "plan-starter",
     name: "Starter",
-    price: "$99",
-    period: "mo",
-    description: "For small businesses beginning sustainability reporting",
+    price: "SAR 3.500",
+    period: "month",
+    description: "Scope 1 & 2 Monitoring",
     features: [
-      "GHG Scope 1 & 2",
+      "Direct emissions (Scope 1)",
+      "Energy tracking (scope 2)",
+      "Facility dashboards",
+      "Monthly & quarterly analytics",
+      "Data export & basic reports",
       "Up to 5 users",
-      "Basic ESG metrics",
-      "Email support",
     ],
     activeSubscribers: 22,
     highlight: false,
@@ -598,8 +605,8 @@ export const subscriptionPlans: SubscriptionPlan[] = [
   {
     id: "plan-professional",
     name: "Professional",
-    price: "$299",
-    period: "mo",
+    price: "SAR 4.200",
+    period: "month",
     description: "For growing companies with active ESG programs",
     features: [
       "Full GHG (Scope 1,2,3)",
@@ -614,8 +621,8 @@ export const subscriptionPlans: SubscriptionPlan[] = [
   {
     id: "plan-enterprise",
     name: "Enterprise",
-    price: "Custom",
-    period: null,
+    price: "SAR 5000",
+    period: "month",
     description: "For large enterprises with complex reporting needs",
     features: [
       "All modules + API access",
@@ -926,3 +933,452 @@ export const auditEvents: AuditEvent[] = [
     severity: "Info",
   },
 ];
+
+export type NotificationCategory =
+  | "Alerts"
+  | "System"
+  | "Companies"
+  | "Subscriptions"
+  | "Users";
+
+export type NotificationIcon =
+  | "shield"
+  | "trial"
+  | "company"
+  | "renewal"
+  | "warning"
+  | "partner"
+  | "maintenance";
+
+export interface Notification {
+  id: string;
+  title: string;
+  description: string;
+  time: string;
+  category: NotificationCategory;
+  icon: NotificationIcon;
+  iconBg: string;
+  iconColor: string;
+  unread: boolean;
+}
+
+export const notifications: Notification[] = [
+  {
+    id: "N-001",
+    title: "Security Alert – Multiple Failed Logins",
+    description:
+      "3 failed login attempts detected for admin@aquatech.com from IP 45.33.32.156",
+    time: "12 min ago",
+    category: "Alerts",
+    icon: "shield",
+    iconBg: "bg-rose-50",
+    iconColor: "text-rose-500",
+    unread: true,
+  },
+  {
+    id: "N-002",
+    title: "Trial Expiring – RetailCore Inc.",
+    description:
+      "RetailCore Inc. trial period expires in 2 days. Revenue at risk: $99/mo",
+    time: "1 hour ago",
+    category: "Subscriptions",
+    icon: "trial",
+    iconBg: "bg-amber-50",
+    iconColor: "text-amber-500",
+    unread: true,
+  },
+  {
+    id: "N-003",
+    title: "New Company Onboarded",
+    description:
+      "Nexgen Steels Ltd. successfully onboarded to the Enterprise plan",
+    time: "3 hours ago",
+    category: "Companies",
+    icon: "company",
+    iconBg: "bg-teal-50",
+    iconColor: "text-teal-600",
+    unread: true,
+  },
+  {
+    id: "N-004",
+    title: "Subscription Renewal – AquaTech Ltd.",
+    description:
+      "AquaTech Ltd. Enterprise subscription has been auto-renewed for $3,800/mo",
+    time: "Yesterday 4:22 PM",
+    category: "Subscriptions",
+    icon: "renewal",
+    iconBg: "bg-slate-100",
+    iconColor: "text-slate-500",
+    unread: true,
+  },
+  {
+    id: "N-005",
+    title: "Data Integrity Warning",
+    description:
+      "FarmLink Agri. has not submitted Scope 1 data for the past 3 months",
+    time: "Yesterday 2:10 PM",
+    category: "Alerts",
+    icon: "warning",
+    iconBg: "bg-orange-50",
+    iconColor: "text-orange-500",
+    unread: true,
+  },
+  {
+    id: "N-006",
+    title: "New Partner Added",
+    description:
+      "EcoConsult Group has been onboarded as a Gold consulting partner",
+    time: "2 days ago",
+    category: "Companies",
+    icon: "partner",
+    iconBg: "bg-blue-50",
+    iconColor: "text-blue-500",
+    unread: true,
+  },
+  {
+    id: "N-007",
+    title: "System Maintenance Complete",
+    description:
+      "Scheduled maintenance window completed. All services operational.",
+    time: "3 days ago",
+    category: "System",
+    icon: "maintenance",
+    iconBg: "bg-slate-100",
+    iconColor: "text-slate-400",
+    unread: false,
+  },
+];
+
+export interface NotificationChannel {
+  id: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+}
+
+export const notificationChannels: NotificationChannel[] = [
+  {
+    id: "in-app",
+    label: "In-App Alerts",
+    description: "Real-time browser alerts",
+    enabled: true,
+  },
+  {
+    id: "email",
+    label: "Email Digest",
+    description: "Daily summary email",
+    enabled: true,
+  },
+  {
+    id: "sms",
+    label: "SMS Alerts",
+    description: "Critical alerts only",
+    enabled: false,
+  },
+  {
+    id: "slack",
+    label: "Slack Integration",
+    description: "Team channel alerts",
+    enabled: true,
+  },
+];
+
+export interface AlertSummaryItem {
+  label: string;
+  count: number;
+  color: string;
+}
+
+export const alertSummary: AlertSummaryItem[] = [
+  { label: "Security", count: 1, color: "bg-rose-500" },
+  { label: "Billing", count: 2, color: "bg-amber-400" },
+  { label: "System", count: 1, color: "bg-blue-500" },
+  { label: "Companies", count: 2, color: "bg-teal-500" },
+  { label: "Users", count: 1, color: "bg-purple-500" },
+];
+
+// ─────────────────────────────────────────────
+//  PLATFORM SETTINGS
+// ─────────────────────────────────────────────
+
+export interface GeneralSettings {
+  platformName: string;
+  defaultTimezone: string;
+  defaultCurrency: string;
+  reportingFramework: string;
+}
+
+export const generalSettings: GeneralSettings = {
+  platformName: "URImpact ESG Platform",
+  defaultTimezone: "Asia/Kolkata (IST)",
+  defaultCurrency: "USD ($)",
+  reportingFramework: "GHG Protocol",
+};
+
+export interface SecuritySetting {
+  id: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+}
+
+export const securitySettings: SecuritySetting[] = [
+  {
+    id: "2fa",
+    label: "Require 2FA for All Admins",
+    description:
+      "Force two-factor authentication for all administrator accounts",
+    enabled: true,
+  },
+  {
+    id: "sso",
+    label: "Single Sign-On (SSO)",
+    description: "Allow companies to authenticate via SAML 2.0 / OIDC",
+    enabled: true,
+  },
+  {
+    id: "session",
+    label: "Session Timeout (30 min)",
+    description: "Automatically log out inactive users after 30 minutes",
+    enabled: true,
+  },
+  {
+    id: "ip",
+    label: "IP Allowlisting",
+    description: "Restrict admin access to approved IP ranges",
+    enabled: false,
+  },
+  {
+    id: "audit",
+    label: "Audit Log Retention (2 yrs)",
+    description: "Keep detailed audit logs for 2 years before archival",
+    enabled: true,
+  },
+];
+
+export interface EmailSettings {
+  smtpHost: string;
+  smtpPort: string;
+  senderEmail: string;
+  adminAlertEmail: string;
+}
+
+export const emailSettings: EmailSettings = {
+  smtpHost: "smtp.sendgrid.net",
+  smtpPort: "587",
+  senderEmail: "noreply@urimpact.com",
+  adminAlertEmail: "alerts@urimpact.com",
+};
+
+export interface Integration {
+  id: string;
+  name: string;
+  description: string;
+  initial: string;
+  connected: boolean;
+}
+
+export const integrations: Integration[] = [
+  {
+    id: "stripe",
+    name: "Stripe",
+    description: "Payment processing & billing",
+    initial: "S",
+    connected: true,
+  },
+  {
+    id: "sendgrid",
+    name: "SendGrid",
+    description: "Transactional email delivery",
+    initial: "S",
+    connected: true,
+  },
+  {
+    id: "slack",
+    name: "Slack",
+    description: "Team alert notifications",
+    initial: "S",
+    connected: false,
+  },
+  {
+    id: "ga",
+    name: "Google Analytics",
+    description: "Platform usage tracking",
+    initial: "G",
+    connected: true,
+  },
+];
+
+export const industryOptions: string[] = [
+  "Manufacturing",
+  "Construction",
+  "Logistics",
+  "Energy",
+  "Retail",
+  "Water Mgmt",
+  "Transport",
+  "Agriculture",
+  "Technology",
+  "Finance",
+];
+
+export const countryOptions: string[] = [
+  "India",
+  "United States",
+  "United Kingdom",
+  "Germany",
+  "Singapore",
+  "Australia",
+  "UAE",
+  "Japan",
+];
+
+export const employeeOptions: string[] = [
+  "1–50",
+  "51–200",
+  "201–500",
+  "501–1,000",
+  "1,001–5,000",
+  "5,000+",
+];
+
+export const revenueOptions: string[] = [
+  "< $1M",
+  "$1M – $10M",
+  "$10M – $50M",
+  "$50M – $200M",
+  "$200M+",
+];
+
+export interface ModuleOption {
+  id: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+}
+
+export const defaultModules: ModuleOption[] = [
+  {
+    id: "ghg",
+    label: "GHG Reporting",
+    description: "Scope 1, 2, 3 emissions tracking",
+    enabled: true,
+  },
+  {
+    id: "esg",
+    label: "ESG Management",
+    description: "Environmental, Social, Governance",
+    enabled: true,
+  },
+  {
+    id: "gap",
+    label: "Gap Analysis",
+    description: "Benchmarking & compliance gaps",
+    enabled: true,
+  },
+  {
+    id: "decarb",
+    label: "Decarbonisation",
+    description: "Net-zero roadmap & targets",
+    enabled: false,
+  },
+  {
+    id: "supply",
+    label: "Supply Chain",
+    description: "Upstream & downstream tracking",
+    enabled: false,
+  },
+  {
+    id: "bsm",
+    label: "Business Sustainability",
+    description: "BSM reporting framework",
+    enabled: false,
+  },
+];
+
+// ─────────────────────────────────────────────
+//  COMPANY PROFILE: بيانات Nexgen Steels Ltd.
+// ─────────────────────────────────────────────
+
+export interface CompanyProfileStats {
+  totalUsers: number;
+  emissions: string;
+  monthlyRevenue: string;
+  dataCompleteness: string;
+  modulesActive: string;
+}
+
+export interface ScopeBar {
+  label: string;
+  value: number;
+  display: string;
+  widthPct: number;
+}
+
+export interface CompanyProfileModule {
+  id: string;
+  label: string;
+  enabled: boolean;
+}
+
+export interface CompanyProfileData {
+  id: string;
+  name: string;
+  status: CompanyStatus;
+  plan: PlanName;
+  location: string;
+  industry: string;
+  adminEmail: string;
+  joinedDate: string;
+  initial: string;
+  avatarBg: string;
+  avatarText: string;
+  stats: CompanyProfileStats;
+  details: Record<string, string>;
+  scopeSummary: ScopeBar[];
+  modules: CompanyProfileModule[];
+}
+
+export const companyProfile: CompanyProfileData = {
+  id: "CMP-1000",
+  name: "Nexgen Steels Ltd.",
+  status: "Active",
+  plan: "Enterprise",
+  location: "Mumbai, India",
+  industry: "Manufacturing",
+  adminEmail: "admin@nexgen.com",
+  joinedDate: "Joined March 2023",
+  initial: "N",
+  avatarBg: "bg-teal-50",
+  avatarText: "text-teal-600",
+  stats: {
+    totalUsers: 42,
+    emissions: "48,210",
+    monthlyRevenue: "$4,200",
+    dataCompleteness: "98.2%",
+    modulesActive: "4 / 6",
+  },
+  details: {
+    "Company ID": "CMP-1000",
+    "Registration No.": "U27100MH2018PTC308XXX",
+    "GST/Tax ID": "27AABCN1234F1Z5",
+    Website: "www.nexgensteels.com",
+    Phone: "+91 22 4567 8900",
+    Employees: "1,200 – 1,500",
+    "Annual Revenue": "₹850 Cr",
+    "Primary Contact": "Rajesh Mehta (CEO)",
+  },
+  scopeSummary: [
+    { label: "Scope 1", value: 18200, display: "18,200 tCO₂e", widthPct: 75 },
+    { label: "Scope 2", value: 12400, display: "12,400 tCO₂e", widthPct: 51 },
+    { label: "Scope 3", value: 17610, display: "17,610 tCO₂e", widthPct: 73 },
+  ],
+  modules: [
+    { id: "ghg", label: "GHG", enabled: true },
+    { id: "esg", label: "ESG", enabled: true },
+    { id: "gap", label: "Gap Analysis", enabled: true },
+    { id: "decarb", label: "Decarbonisation", enabled: true },
+    { id: "supply", label: "Supply Chain", enabled: false },
+    { id: "bsm", label: "BSM", enabled: false },
+  ],
+};

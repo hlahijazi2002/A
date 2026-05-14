@@ -11,6 +11,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { companies } from "../../data/data";
+import { Link } from "react-router-dom";
 
 const CompanyManagement = () => {
   return (
@@ -28,9 +29,12 @@ const CompanyManagement = () => {
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 transition-colors">
             <Download size={16} /> Export CSV
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#2D9A8F] rounded-lg text-sm font-bold text-white hover:bg-[#248177] transition-colors shadow-sm">
+          <Link
+            to="/addCompany"
+            className="bg-[#0d9488] hover:bg-[#0c8379] text-white px-4 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 shadow-sm transition-all"
+          >
             <Plus size={16} /> Add Company
-          </button>
+          </Link>
         </div>
       </div>
 

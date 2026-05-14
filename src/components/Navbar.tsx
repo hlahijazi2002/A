@@ -1,13 +1,27 @@
 import { Search, Bell } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // أضفنا useLocation
 
 const Navbar = () => {
+  const location = useLocation();
+
+  // دالة لتحويل المسار الحالي إلى اسم صفحة
+  const getPageName = () => {
+    const path = location.pathname.split("/").filter((x) => x); // نأخذ الجزء الأخير من المسار
+    if (path.length === 0) return "Dashboard"; // إذا كان المسار فارغاً فهو الداشبورد
+
+    // تحويل الكلمات مثل company-profile إلى Company Profile
+    return path[path.length - 1]
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
   return (
     <div className="h-14 bg-white flex items-center justify-between px-6 sticky top-0 z-10 w-full">
+      {/* الجزء الديناميكي المعدل */}
       <div className="flex items-center gap-1.5 text-[12px] whitespace-nowrap">
         <span className="text-slate-400">Admin</span>
         <span className="text-slate-300 font-light">›</span>
-        <span className="text-slate-900 font-bold">Dashboard</span>
+        <span className="text-slate-900 font-bold">{getPageName()}</span>
       </div>
 
       <div className="flex items-center gap-3">
@@ -28,6 +42,7 @@ const Navbar = () => {
             Super Admin
           </span>
         </div>
+
         <Link to="/notifications">
           <div className="relative cursor-pointer px-1">
             <Bell size={18} className="text-slate-500" />

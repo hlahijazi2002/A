@@ -10,6 +10,8 @@ import PartnerManagement from "./pages/PartnerManagement";
 import AuditLogs from "./pages/AuditLogs";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
+import AddCompany from "./pages/AddCompany";
+import CompanyProfile from "./pages/CompanyProfile";
 
 export default function App() {
   return (
@@ -21,6 +23,8 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/companies" element={<CompanyManagement />} />
+          <Route path="/addCompany" element={<AddCompany />} />
+          <Route path="/companyProfile" element={<CompanyProfile />} />
           <Route path="/analytics" element={<EmissionsAnalytics />} />
           <Route path="/users" element={<UserManagement />} />
           <Route path="/subscription" element={<SubscriptionManagement />} />
