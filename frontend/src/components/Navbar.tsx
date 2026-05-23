@@ -1,0 +1,106 @@
+import { Search, Bell, X } from "lucide-react";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+
+const getPageName = (pathname: string): string => {
+  const parts = pathname.split("/").filter(Boolean);
+  if (!parts.length) return "Dashboard";
+  return parts[parts.length - 1]
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
+const Navbar = () => {
+  const { pathname } = useLocation();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  return (
+    <header className="h-14 bg-white border-b border-slate-100 sticky top-0 z-10 w-full">
+      {/* Main row */}
+      <div className="h-full flex items-center justify-between px-4 md:px-6">
+        {/* Breadcrumb — hidden when mobile search is open */}
+        {!searchOpen && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 whitespace-nowrap min-w-0">
+            <span className="shrink-0">Admin</span>
+            <span className="font-light shrink-0">›</span>
+            <span className="text-slate-900 font-bold truncate max-w-30 sm:max-w-none">
+              {getPageName(pathname)}
+            </span>
+          </div>
+        )}
+
+        {/* Mobile search input — full width when open */}
+        {searchOpen && (
+          <div className="flex-1 flex items-center gap-2 md:hidden">
+            <div className="relative flex-1">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={13}
+              />
+              <input
+                type="text"
+                placeholder="Search companies, users..."
+                autoFocus
+                className="w-full pl-8 pr-4 py-1.5 bg-slate-50 border border-slate-100 text-xs rounded-md outline-none focus:border-teal-400 transition-colors"
+              />
+            </div>
+            <button
+              onClick={() => setSearchOpen(false)}
+              className="p-1 text-slate-500 hover:text-slate-700 transition-colors"
+              aria-label="Close search"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* Right side */}
+        <div
+          className={`flex items-center gap-2 md:gap-3 ${searchOpen ? "md:flex hidden" : "flex"}`}
+        >
+          {/* Desktop search */}
+          <div className="relative hidden md:block">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              size={13}
+            />
+            <input
+              type="text"
+              placeholder="Search companies, users..."
+              className="pl-8 pr-4 py-1.5 bg-slate-50 border border-slate-100 text-xs w-48 rounded-md outline-none focus:border-teal-400 transition-colors"
+            />
+          </div>
+
+          {/* Mobile search toggle button */}
+          <button
+            className="md:hidden p-1 text-slate-500 hover:text-slate-700 transition-colors"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Open search"
+          >
+            <Search size={17} />
+          </button>
+
+          {/* Role badge */}
+          <div className="hidden sm:flex bg-linear-to-r from-[#0a1a16] via-[#142e29] to-[#1a5546] rounded-full border border-white/5">
+            <span className="text-[10px] px-2.5 py-1 font-black text-amber-400 uppercase tracking-wide">
+              Super Admin
+            </span>
+          </div>
+
+          {/* Notifications */}
+          <Link to="/notifications" className="relative p-1">
+            <Bell size={17} className="text-slate-500" />
+            <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
+          </Link>
+
+          {/* Avatar */}
+          <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white text-[11px] font-bold cursor-pointer select-none shrink-0">
+            SA
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Navbar;
