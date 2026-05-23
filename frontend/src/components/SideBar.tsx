@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -11,7 +11,6 @@ import {
   Bell,
   Settings,
   LogOut,
-  Menu,
   X,
 } from "lucide-react";
 
@@ -76,37 +75,18 @@ const menuItems = [
   },
 ];
 
-// Exported so Navbar or Layout can use it too
-export const HamburgerButton = ({ onClick }: { onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className="md:hidden p-1.5 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-    aria-label="Open menu"
-  >
-    <Menu size={20} />
-  </button>
-);
-
 const SidebarContent = ({ onClose }: { onClose?: () => void }) => (
   <>
-    {/* Logo */}
     <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200/60 shrink-0">
-      <div className="flex items-center gap-2">
-        <img className="w-7 h-7" src="/logo.png" alt="logo" />
-        <span className="font-bold text-slate-800 text-sm tracking-tight">
-          URIMPACT
-        </span>
-      </div>
+      <img className="w-30 h-30" src="/logo.png" alt="logo" />
       <div className="flex items-center gap-2">
         <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold">
           ADMIN
         </span>
-        {/* Close button — only visible on mobile */}
         {onClose && (
           <button
             onClick={onClose}
             className="md:hidden p-1 rounded-md text-slate-400 hover:text-slate-700 transition-colors"
-            aria-label="Close menu"
           >
             <X size={16} />
           </button>
@@ -114,7 +94,6 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => (
       </div>
     </div>
 
-    {/* Nav */}
     <nav className="flex-1 overflow-y-auto p-3">
       {SECTIONS.map((section) => (
         <div key={section} className="mb-4">
@@ -157,7 +136,6 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => (
       ))}
     </nav>
 
-    {/* User */}
     <div className="p-3 border-t border-slate-200 bg-white shrink-0">
       <div className="flex items-center gap-2 px-2 py-1.5">
         <div className="w-7 h-7 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold text-xs shrink-0">
@@ -180,19 +158,13 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => (
   </>
 );
 
-const Sidebar = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  // Close on resize to md+
-  useEffect(() => {
-    const handler = () => {
-      if (window.innerWidth >= 768) setMobileOpen(false);
-    };
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, []);
-
-  // Lock body scroll when drawer is open
+const Sidebar = ({
+  mobileOpen,
+  onClose,
+}: {
+  mobileOpen: boolean;
+  onClose: () => void;
+}) => {
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
@@ -202,31 +174,26 @@ const Sidebar = () => {
 
   return (
     <>
-      {/*  Desktop sidebar  */}
+      {/* Desktop */}
       <aside className="hidden md:flex w-56 lg:w-60 h-screen bg-slate-50 border-r border-slate-200 flex-col shrink-0">
         <SidebarContent />
       </aside>
 
-      {/* ── Mobile: hamburger button */}
-      <div className="md:hidden fixed top-0 left-0 z-30 h-14 flex items-center px-4">
-        <HamburgerButton onClick={() => setMobileOpen(true)} />
-      </div>
-
-      {/* ── Mobile: backdrop ── */}
+      {/* Mobile backdrop */}
       {mobileOpen && (
         <div
           className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
+          onClick={onClose}
         />
       )}
 
-      {/* ── Mobile: drawer ── */}
+      {/* Mobile drawer */}
       <aside
         className={`md:hidden fixed top-0 left-0 z-50 h-screen w-64 bg-slate-50 border-r border-slate-200 flex flex-col
-          transform transition-transform duration-300 ease-in-out
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        transform transition-transform duration-300 ease-in-out
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <SidebarContent onClose={() => setMobileOpen(false)} />
+        <SidebarContent onClose={onClose} />
       </aside>
     </>
   );

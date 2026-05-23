@@ -1,4 +1,4 @@
-import { Search, Bell, X } from "lucide-react";
+import { Search, Bell, X, Menu } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -10,28 +10,40 @@ const getPageName = (pathname: string): string => {
     .replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-const Navbar = () => {
+// اعمليها prop عشان تتواصل مع الـ Sidebar
+const Navbar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <header className="h-14 bg-white border-b border-slate-100 sticky top-0 z-10 w-full">
-      {/* Main row */}
       <div className="h-full flex items-center justify-between px-4 md:px-6">
-        {/* Breadcrumb — hidden when mobile search is open */}
-        {!searchOpen && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 whitespace-nowrap min-w-0">
-            <span className="shrink-0">Admin</span>
-            <span className="font-light shrink-0">›</span>
-            <span className="text-slate-900 font-bold truncate max-w-30 sm:max-w-none">
-              {getPageName(pathname)}
-            </span>
-          </div>
-        )}
+        {/* Left side */}
+        <div className="flex items-center gap-3">
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={onMenuClick}
+            className="md:hidden p-1.5 rounded-md text-slate-500 hover:bg-slate-100 transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
 
-        {/* Mobile search input — full width when open */}
+          {/* Breadcrumb */}
+          {!searchOpen && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 whitespace-nowrap">
+              <span className="shrink-0">Admin</span>
+              <span className="font-light shrink-0">›</span>
+              <span className="text-slate-900 font-bold truncate max-w-30 sm:max-w-none">
+                {getPageName(pathname)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile search input */}
         {searchOpen && (
-          <div className="flex-1 flex items-center gap-2 md:hidden">
+          <div className="flex-1 flex items-center gap-2 md:hidden mx-3">
             <div className="relative flex-1">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -46,8 +58,7 @@ const Navbar = () => {
             </div>
             <button
               onClick={() => setSearchOpen(false)}
-              className="p-1 text-slate-500 hover:text-slate-700 transition-colors"
-              aria-label="Close search"
+              className="p-1 text-slate-500"
             >
               <X size={16} />
             </button>
@@ -71,11 +82,10 @@ const Navbar = () => {
             />
           </div>
 
-          {/* Mobile search toggle button */}
+          {/* Mobile search toggle */}
           <button
-            className="md:hidden p-1 text-slate-500 hover:text-slate-700 transition-colors"
+            className="md:hidden p-1 text-slate-500"
             onClick={() => setSearchOpen(true)}
-            aria-label="Open search"
           >
             <Search size={17} />
           </button>
