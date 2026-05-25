@@ -15,7 +15,6 @@ const getOrgs = async (req, res) => {
 
       let data = [...mockData.organizations];
 
-      // Filters
       if (search) {
         data = data.filter((o) =>
           o.name.toLowerCase().includes(search.toLowerCase()),
@@ -37,9 +36,10 @@ const getOrgs = async (req, res) => {
       });
     }
 
-    // Real API call
-    // const response = await carbonApi.get('/organizations', { params: req.query });
-    // return res.json(response.data);
+    // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("getOrgs error:", err);
     res.status(500).json({ error: "Server error." });
@@ -56,6 +56,10 @@ const getOrgById = async (req, res) => {
 
       return res.json({ ...org, userCount: 2, totalCo2e: 3000.0 });
     }
+    // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("getOrgById error:", err);
     res.status(500).json({ error: "Server error." });
@@ -73,7 +77,10 @@ const updateOrgStatus = async (req, res) => {
 
       org.isActive = isActive;
       return res.json({ success: true, org });
-    }
+    } // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("updateOrgStatus error:", err);
     res.status(500).json({ error: "Server error." });
@@ -93,7 +100,10 @@ const updateOrgSubscription = async (req, res) => {
       if (subscriptionStatus) org.subscriptionStatus = subscriptionStatus;
 
       return res.json({ success: true, org });
-    }
+    } // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("updateOrgSubscription error:", err);
     res.status(500).json({ error: "Server error." });

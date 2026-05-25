@@ -1,14 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../api/client";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("admin@urimpact.com");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/dashboard");
+    try {
+      const data = await api.post("/auth/login", { email, password });
+      localStorage.setItem("token", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      navigate("/dashboard");
+    } catch {
+      alert("Invalid email or password");
+    }
   };
 
   return (

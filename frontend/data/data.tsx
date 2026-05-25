@@ -1,13 +1,7 @@
-// ============================================================
-//  appData.ts — الداتا + التايبس في مكان واحد
-//  كل type معرّف فوق الـ export اللي بيستخدمه مباشرة
-// ============================================================
 
 import { FileText, ShieldAlert, UserCog } from "lucide-react";
 
-// ─────────────────────────────────────────────
-//  SHARED: الشركات (Dashboard + CompanyManagement)
-// ─────────────────────────────────────────────
+
 
 export type CompanyStatus = "Active" | "Trial" | "Suspended" | "Churned";
 export type PlanName = "Enterprise" | "Pro" | "Professional" | "Starter";

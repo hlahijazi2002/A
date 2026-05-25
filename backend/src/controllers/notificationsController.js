@@ -28,6 +28,10 @@ const broadcast = async (req, res) => {
         notification: { title, message, type },
       });
     }
+    // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("broadcast error:", err);
     res.status(500).json({ error: "Server error." });

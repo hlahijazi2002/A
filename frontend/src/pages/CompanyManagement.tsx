@@ -12,13 +12,7 @@ import {
 } from "lucide-react";
 import { companies } from "../../data/data";
 import { Link } from "react-router-dom";
-
-const planClass = (plan: string) => {
-  if (plan === "Enterprise")
-    return "bg-linear-to-r from-[#0a1a16] via-[#142e29] to-[#1a5546] text-amber-400";
-  if (plan === "Pro") return "bg-teal-50 text-teal-600";
-  return "bg-slate-100 text-slate-400";
-};
+import { planClass } from "../utils/helpers";
 
 const statusClass = (status: string) => {
   if (status === "Active")

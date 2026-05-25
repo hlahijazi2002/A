@@ -28,6 +28,10 @@ const getUsers = async (req, res) => {
         totalPages: Math.ceil(data.length / limit),
       });
     }
+    // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("getUsers error:", err);
     res.status(500).json({ error: "Server error." });
@@ -42,6 +46,10 @@ const getUserById = async (req, res) => {
       if (!user) return res.status(404).json({ error: "User not found." });
       return res.json(user);
     }
+    // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("getUserById error:", err);
     res.status(500).json({ error: "Server error." });
@@ -58,7 +66,10 @@ const updateUserStatus = async (req, res) => {
 
       user.isActive = isActive;
       return res.json({ success: true, user });
-    }
+    } // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("updateUserStatus error:", err);
     res.status(500).json({ error: "Server error." });
@@ -76,6 +87,10 @@ const updateUserRole = async (req, res) => {
       user.role = role;
       return res.json({ success: true, user });
     }
+    // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("updateUserRole error:", err);
     res.status(500).json({ error: "Server error." });

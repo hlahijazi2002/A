@@ -30,6 +30,10 @@ const getAuditLogs = async (req, res) => {
         totalPages: Math.ceil(data.length / limit),
       });
     }
+    // Real API — coming soon
+    return res
+      .status(501)
+      .json({ error: "Not implemented. Waiting for Carbon App API." });
   } catch (err) {
     console.error("getAuditLogs error:", err);
     res.status(500).json({ error: "Server error." });

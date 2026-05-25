@@ -23,6 +23,7 @@ import {
   companiesByPlan,
   subscriptionStatus,
 } from "../../data/data";
+import { planClass } from "../utils/helpers";
 
 const statIcons = [
   <Building2 size={18} />,
@@ -30,13 +31,6 @@ const statIcons = [
   <DollarSign size={18} />,
   <Smile size={18} className="text-orange-400" />,
 ];
-
-const planClass = (plan: string) => {
-  if (plan === "Enterprise")
-    return "bg-linear-to-r from-[#0a1a16] via-[#142e29] to-[#1a5546] text-amber-400";
-  if (plan === "Pro") return "bg-teal-50 text-teal-600";
-  return "bg-slate-100 text-slate-500";
-};
 
 const Dashboard = () => {
   const recentCompanies = companies.slice(0, 5);

@@ -2,15 +2,33 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 
+//  Validation helper
+const validateLogin = (email, password) => {
+  const errors = [];
+  if (!email || typeof email !== "string") errors.push("Email is required.");
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    errors.push("Invalid email format.");
+  if (!password || typeof password !== "string")
+    errors.push("Password is required.");
+  else if (password.length < 6)
+    errors.push("Password must be at least 6 characters.");
+  return errors;
+};
+
 //  Login
 const login = async (req, res) => {
   const { email, password } = req.body;
 
+  // Validate input
+  const errors = validateLogin(email, password);
+  if (errors.length > 0) {
+    return res.status(400).json({ error: errors[0] });
+  }
+
   try {
-    // 1. Check admin exists
     const result = await pool.query(
       "SELECT * FROM admin_users WHERE email = $1 AND is_active = true",
-      [email],
+      [email.toLowerCase().trim()],
     );
 
     const admin = result.rows[0];
@@ -18,24 +36,23 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    // 2. Check password
     const validPassword = await bcrypt.compare(password, admin.password);
     if (!validPassword) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    // 3. Generate tokens
     const accessToken = jwt.sign(
       { id: admin.id, email: admin.email, role: admin.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
-    const refreshToken = jwt.sign({ id: admin.id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
-    });
+    const refreshToken = jwt.sign(
+      { id: admin.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN },
+    );
 
-    // 4. Save session
     await pool.query(
       `INSERT INTO admin_sessions (admin_id, refresh_token, expires_at)
        VALUES ($1, $2, NOW() + INTERVAL '7 days')`,
@@ -58,24 +75,24 @@ const login = async (req, res) => {
   }
 };
 
-//  Refresh Token 
+//  Refresh Token
 const refresh = async (req, res) => {
   const { refreshToken } = req.body;
 
-  if (!refreshToken) {
+  if (!refreshToken || typeof refreshToken !== "string") {
     return res.status(400).json({ error: "Refresh token required." });
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     const session = await pool.query(
-      "SELECT * FROM admin_sessions WHERE refresh_token = $1",
+      "SELECT * FROM admin_sessions WHERE refresh_token = $1 AND expires_at > NOW()",
       [refreshToken],
     );
 
     if (!session.rows[0]) {
-      return res.status(401).json({ error: "Invalid refresh token." });
+      return res.status(401).json({ error: "Session expired or invalid." });
     }
 
     const accessToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, {
@@ -91,6 +108,10 @@ const refresh = async (req, res) => {
 //  Logout
 const logout = async (req, res) => {
   const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ error: "Refresh token required." });
+  }
 
   try {
     await pool.query("DELETE FROM admin_sessions WHERE refresh_token = $1", [

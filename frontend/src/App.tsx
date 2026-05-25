@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LogInPage from "./pages/LoginPage";
 import Layout from "./Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import CompanyManagement from "./pages/CompanyManagement";
 import EmissionsAnalytics from "./pages/EmissionsAnalytics";
@@ -19,7 +20,13 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LogInPage />} />
 
-        <Route element={<Layout />}>
+        <Route
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/companies" element={<CompanyManagement />} />
@@ -34,7 +41,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
