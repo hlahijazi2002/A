@@ -17,13 +17,16 @@ import {
 import { Link } from "react-router-dom";
 import {
   dashboardStats,
-  companies,
   platformHealth,
   recentActivity,
   companiesByPlan,
   subscriptionStatus,
+  type Company,
 } from "../../data/data";
+import { api } from "../api/client";
 import { planClass } from "../utils/helpers";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useEffect, useState } from "react";
 
 const statIcons = [
   <Building2 size={18} />,
@@ -32,8 +35,44 @@ const statIcons = [
   <Smile size={18} className="text-orange-400" />,
 ];
 
+interface OrgFromAPI {
+  id?: string;
+  name: string;
+  sector?: string;
+  subscriptionPlan?: string;
+  isActive?: boolean;
+  employeesCount?: number;
+}
+
 const Dashboard = () => {
-  const recentCompanies = companies.slice(0, 5);
+  const [recentCompanies, setRecentCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("/orgs?limit=8")
+      .then((res) => {
+        const mapped = res.data.map((org: OrgFromAPI, i: number) => ({
+          id: org.id || `ORG-${i}`,
+          name: org.name,
+          ind: org.sector || "N/A",
+          plan: (org.subscriptionPlan as Company["plan"]) || "Starter",
+          status: (org.isActive ? "Active" : "Suspended") as Company["status"],
+          users: org.employeesCount || 0,
+          emissions: "—",
+          joined: "—",
+          initial: org.name.charAt(0).toUpperCase(),
+          color: [
+            "bg-teal-50 text-teal-600",
+            "bg-blue-50 text-blue-600",
+            "bg-orange-50 text-orange-600",
+          ][i % 3],
+        }));
+        setRecentCompanies(mapped);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] space-y-6">
@@ -119,57 +158,65 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {recentCompanies.map((row, i) => (
-                  <tr
-                    key={i}
-                    className="hover:bg-slate-50/30 transition-colors cursor-pointer relative"
-                  >
-                    <td className="px-4 py-3">
-                      <Link
-                        to="/companyProfile"
-                        className="absolute inset-0 z-10"
-                      />
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-9 h-9 ${row.color} rounded-xl flex items-center justify-center font-bold text-sm shadow-sm`}
-                        >
-                          {row.initial}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-800">
-                            {row.name}
-                          </p>
-                          <p className="text-[10px] text-slate-400">
-                            {row.ind}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-slate-500">
-                      {row.ind}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`text-[9px] px-2.5 py-1 rounded-md font-bold uppercase ${planClass(row.plan)}`}
-                      >
-                        {row.plan}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded-full ${row.status === "Active" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${row.status === "Active" ? "bg-emerald-500" : "bg-amber-500"}`}
-                        />
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs font-bold text-slate-700">
-                      {row.users}
+                {loading ? (
+                  <tr>
+                    <td colSpan={5}>
+                      <LoadingSpinner />
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  recentCompanies.map((row, i) => (
+                    <tr
+                      key={i}
+                      className="hover:bg-slate-50/30 transition-colors cursor-pointer relative"
+                    >
+                      <td className="px-4 py-3">
+                        <Link
+                          to={`/companyProfile/${row.id}`}
+                          className="absolute inset-0 z-10"
+                        />
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-9 h-9 ${row.color} rounded-xl flex items-center justify-center font-bold text-sm shadow-sm`}
+                          >
+                            {row.initial}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-800">
+                              {row.name}
+                            </p>
+                            <p className="text-[10px] text-slate-400">
+                              {row.ind}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-500">
+                        {row.ind}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`text-[9px] px-2.5 py-1 rounded-md font-bold uppercase ${planClass(row.plan)}`}
+                        >
+                          {row.plan}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded-full ${row.status === "Active" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${row.status === "Active" ? "bg-emerald-500" : "bg-amber-500"}`}
+                          />
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs font-bold text-slate-700">
+                        {row.users}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

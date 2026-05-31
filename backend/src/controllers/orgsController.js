@@ -1,6 +1,7 @@
 const mockData = require("../config/mockData");
 const MOCK_MODE = process.env.MOCK_MODE === "true";
 
+let orgsData = [...mockData.organizations];
 //  Get All Organizations
 const getOrgs = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ const getOrgs = async (req, res) => {
         limit = 20,
       } = req.query;
 
-      let data = [...mockData.organizations];
+      let data = orgsData;
 
       if (search) {
         data = data.filter((o) =>

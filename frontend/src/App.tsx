@@ -6,7 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import CompanyManagement from "./pages/CompanyManagement";
 import EmissionsAnalytics from "./pages/EmissionsAnalytics";
 import UserManagement from "./pages/UserManagement";
-import SubscriptionManagement from "./pages/SubscriptionManagement ";
+import SubscriptionManagement from "./pages/SubscriptionManagement";
 import PartnerManagement from "./pages/PartnerManagement";
 import AuditLogs from "./pages/AuditLogs";
 import Notifications from "./pages/Notifications";
@@ -27,11 +27,10 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/companies" element={<CompanyManagement />} />
           <Route path="/addCompany" element={<AddCompany />} />
-          <Route path="/companyProfile" element={<CompanyProfile />} />
+          <Route path="/companyProfile/:id" element={<CompanyProfile />} />
           <Route path="/analytics" element={<EmissionsAnalytics />} />
           <Route path="/users" element={<UserManagement />} />
           <Route path="/subscription" element={<SubscriptionManagement />} />

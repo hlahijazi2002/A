@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { api } from "../api/client";
 import { MapPin, Briefcase, Mail, Calendar, Edit2 } from "lucide-react";
 import { companyProfile } from "../../data/data";
 import type { CompanyProfileModule } from "../../data/data";
@@ -37,9 +39,23 @@ const TABS: TabName[] = [
 const SCOPE_COLORS = ["bg-teal-600", "bg-teal-400", "bg-teal-200"];
 
 const CompanyProfile = () => {
-  const p = companyProfile;
   const [activeTab, setActiveTab] = useState<TabName>("Overview");
   const [modules, setModules] = useState<CompanyProfileModule[]>(p.modules);
+  const { id } = useParams();
+  const [orgData, setOrgData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      api
+        .get(`/orgs/${id}`)
+        .then((res) => setOrgData(res))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
+
+  const p = orgData || companyProfile;
 
   const toggleModule = (id: string) =>
     setModules((prev) =>

@@ -12,7 +12,8 @@ const createTables = async () => {
         name        VARCHAR(255) NOT NULL,
         role        VARCHAR(50) NOT NULL DEFAULT 'ADMIN',
         is_active   BOOLEAN NOT NULL DEFAULT true,
-        created_at  TIMESTAMP DEFAULT NOW()
+        created_at  TIMESTAMP DEFAULT NOW(),
+        updated_at  TIMESTAMP DEFAULT NOW()
       );
 
       -- Admin Sessions
@@ -21,7 +22,8 @@ const createTables = async () => {
         admin_id      UUID REFERENCES admin_users(id) ON DELETE CASCADE,
         refresh_token TEXT NOT NULL,
         expires_at    TIMESTAMP NOT NULL,
-        created_at    TIMESTAMP DEFAULT NOW()
+        created_at    TIMESTAMP DEFAULT NOW(),
+        updated_at    TIMESTAMP DEFAULT NOW()
       );
 
       -- Partner Organizations
@@ -31,7 +33,8 @@ const createTables = async () => {
         email       VARCHAR(255),
         country     VARCHAR(100),
         is_active   BOOLEAN NOT NULL DEFAULT true,
-        created_at  TIMESTAMP DEFAULT NOW()
+        created_at  TIMESTAMP DEFAULT NOW(),
+        updated_at  TIMESTAMP DEFAULT NOW()
       );
 
       -- Notification Templates
@@ -40,7 +43,8 @@ const createTables = async () => {
         title       VARCHAR(255) NOT NULL,
         message     TEXT NOT NULL,
         type        VARCHAR(50) NOT NULL DEFAULT 'INFO',
-        created_at  TIMESTAMP DEFAULT NOW()
+        created_at  TIMESTAMP DEFAULT NOW(),
+        updated_at  TIMESTAMP DEFAULT NOW()
       );
 
       -- Admin Activity Log
@@ -51,7 +55,8 @@ const createTables = async () => {
         resource    VARCHAR(255),
         resource_id VARCHAR(255),
         details     JSONB,
-        created_at  TIMESTAMP DEFAULT NOW()
+        created_at  TIMESTAMP DEFAULT NOW(),
+        updated_at  TIMESTAMP DEFAULT NOW()
       );
 
     `);

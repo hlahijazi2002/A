@@ -10,17 +10,40 @@ const getPageName = (pathname: string): string => {
     .replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-// اعمليها prop عشان تتواصل مع الـ Sidebar
+interface AdminInfo {
+  name: string;
+  role: string;
+  initials: string;
+}
+
+const getAdminFromToken = (): AdminInfo => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return { name: "Admin", role: "ADMIN", initials: "A" };
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const name = payload.name || payload.email?.split("@")[0] || "Admin";
+    const initials = name
+      .split(" ")
+      .map((n: string) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+    return { name, role: payload.role || "ADMIN", initials };
+  } catch {
+    return { name: "Admin", role: "ADMIN", initials: "A" };
+  }
+};
+
 const Navbar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [admin] = useState<AdminInfo>(getAdminFromToken());
 
   return (
     <header className="h-14 bg-white border-b border-slate-100 sticky top-0 z-10 w-full">
       <div className="h-full flex items-center justify-between px-4 md:px-6">
         {/* Left side */}
         <div className="flex items-center gap-3">
-          {/* Hamburger — mobile only */}
           <button
             onClick={onMenuClick}
             className="md:hidden p-1.5 rounded-md text-slate-500 hover:bg-slate-100 transition-colors"
@@ -29,7 +52,6 @@ const Navbar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
             <Menu size={20} />
           </button>
 
-          {/* Breadcrumb */}
           {!searchOpen && (
             <div className="flex items-center gap-1.5 text-xs text-slate-400 whitespace-nowrap">
               <span className="shrink-0">Admin</span>
@@ -93,7 +115,7 @@ const Navbar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
           {/* Role badge */}
           <div className="hidden sm:flex bg-linear-to-r from-[#0a1a16] via-[#142e29] to-[#1a5546] rounded-full border border-white/5">
             <span className="text-[10px] px-2.5 py-1 font-black text-amber-400 uppercase tracking-wide">
-              Super Admin
+              {admin.role.replace(/_/g, " ")}
             </span>
           </div>
 
@@ -105,7 +127,7 @@ const Navbar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
 
           {/* Avatar */}
           <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white text-[11px] font-bold cursor-pointer select-none shrink-0">
-            SA
+            {admin.initials}
           </div>
         </div>
       </div>
