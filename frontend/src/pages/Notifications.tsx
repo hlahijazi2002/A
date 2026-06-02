@@ -9,11 +9,7 @@ import {
   CheckCircle2,
   Settings,
 } from "lucide-react";
-import {
-  notifications,
-  notificationChannels,
-  alertSummary,
-} from "../../data/data";
+import { notificationChannels, alertSummary } from "../../data/data";
 import type {
   Notification,
   NotificationCategory,
@@ -21,6 +17,9 @@ import type {
   NotificationIcon,
   AlertSummaryItem,
 } from "../../data/data";
+import Toggle from "../components/Toggle";
+import useFetch from "../hooks/useFetch";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const iconMap: Record<NotificationIcon, React.ReactNode> = {
   shield: <Shield size={16} />,
@@ -40,23 +39,6 @@ const TABS: Array<"All" | NotificationCategory> = [
   "Subscriptions",
   "Users",
 ];
-
-const Toggle = ({
-  enabled,
-  onChange,
-}: {
-  enabled: boolean;
-  onChange: () => void;
-}) => (
-  <button
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${enabled ? "bg-teal-600" : "bg-slate-200"}`}
-  >
-    <span
-      className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${enabled ? "translate-x-6" : "translate-x-1"}`}
-    />
-  </button>
-);
 
 const NotificationRow = ({ item }: { item: Notification }) => (
   <div className="flex items-start gap-4 px-5 py-4 hover:bg-slate-50/50 transition-colors">
@@ -92,8 +74,13 @@ const Notifications = () => {
   );
   const [channels, setChannels] =
     useState<NotificationChannel[]>(notificationChannels);
-  const [items, setItems] = useState<Notification[]>(notifications);
 
+  const { data, loading } = useFetch<{ data: Notification[] }>(
+    "/notifications",
+    { data: [] },
+  );
+
+  const items = data?.data || [];
   const unreadCount = items.filter((n) => n.unread).length;
   const filtered =
     activeTab === "All" ? items : items.filter((n) => n.category === activeTab);
@@ -103,12 +90,8 @@ const Notifications = () => {
       prev.map((c) => (c.id === id ? { ...c, enabled: !c.enabled } : c)),
     );
 
-  const markAllRead = () =>
-    setItems((prev) => prev.map((n) => ({ ...n, unread: false })));
-
   return (
     <div className="min-h-screen bg-slate-50/30 space-y-5">
-      {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -119,10 +102,7 @@ const Notifications = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={markAllRead}
-            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-          >
+          <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
             Mark all read
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
@@ -132,7 +112,6 @@ const Notifications = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-5 items-start">
-        {/* Left — feed */}
         <div className="flex-1 min-w-0 space-y-4">
           <div className="flex gap-2 flex-wrap">
             {TABS.map((tab) => (
@@ -151,7 +130,9 @@ const Notifications = () => {
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            {filtered.length === 0 ? (
+            {loading ? (
+              <LoadingSpinner />
+            ) : filtered.length === 0 ? (
               <div className="p-12 text-center text-slate-400 text-sm">
                 No notifications in this category
               </div>
@@ -165,7 +146,6 @@ const Notifications = () => {
           </div>
         </div>
 
-        {/* Right — sidebar */}
         <div className="w-full lg:w-72 shrink-0 space-y-4">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <h3 className="font-bold text-slate-800 text-sm mb-4">

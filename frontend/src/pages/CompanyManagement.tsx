@@ -144,11 +144,11 @@ const CompanyManagement = () => {
                   </td>
                 </tr>
               ) : (
-                companies.map((row, i) => {
+                companies.map((row) => {
                   const s = statusClass(row.status);
                   return (
                     <tr
-                      key={i}
+                      key={row.id}
                       className="hover:bg-slate-50/50 transition-colors relative"
                     >
                       <td className="px-5 py-4">

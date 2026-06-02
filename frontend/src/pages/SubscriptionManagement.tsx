@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { Download, Plus, Search, Check, AlertTriangle } from "lucide-react";
 import {
   subscriptionPlans,
-  subscriptionRecords,
   type PlanName,
   type SubscriptionPlan,
   type SubscriptionRecord,
   type SubscriptionStatus,
 } from "../../data/data";
+import useFetch from "../hooks/useFetch";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const planBadgeStyles: Record<PlanName, string> = {
   Enterprise:
@@ -140,87 +142,105 @@ const RecordRow = ({ record }: { record: SubscriptionRecord }) => {
   );
 };
 
-const SubscriptionManagement = () => (
-  <div className="min-h-screen bg-slate-50/30 space-y-6">
-    {/* Header */}
-    <div className="flex flex-wrap justify-between items-start gap-3">
-      <div>
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-          Subscription Management
-        </h1>
-        <p className="text-[13px] text-slate-400 mt-1">
-          Manage plans, billing cycles, and renewals
-        </p>
-      </div>
-      <div className="flex gap-2">
-        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-          <Download size={14} /> Billing History
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-[12px] font-bold shadow-sm transition-all">
-          <Plus size={14} /> Create Plan
-        </button>
-      </div>
-    </div>
+const SubscriptionManagement = () => {
+  const [search, setSearch] = useState("");
 
-    {/* Plan Cards */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-      {subscriptionPlans.map((plan) => (
-        <PlanCard key={plan.id} plan={plan} />
-      ))}
-    </div>
+  const { data, loading } = useFetch<{ data: SubscriptionRecord[] }>(
+    "/subscriptions?limit=20",
+    { data: [] },
+  );
 
-    {/* Table */}
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-      <div className="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-50">
-        <h2 className="font-bold text-slate-800 text-sm">
-          Subscription Records
-        </h2>
+  const records = (data?.data || []).filter((r) =>
+    r.company?.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-50/30 space-y-6">
+      <div className="flex flex-wrap justify-between items-start gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            Subscription Management
+          </h1>
+          <p className="text-[13px] text-slate-400 mt-1">
+            Manage plans, billing cycles, and renewals
+          </p>
+        </div>
         <div className="flex gap-2">
-          <div className="relative">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"
-              size={14}
-            />
-            <input
-              type="text"
-              placeholder="Search company..."
-              className="pl-9 pr-4 py-2 bg-slate-50 rounded-lg text-xs w-48 focus:ring-1 focus:ring-teal-500 outline-none"
-            />
-          </div>
-          <button className="flex items-center gap-2 px-3 py-2 border border-amber-200 bg-amber-50 rounded-lg text-[11px] font-bold text-amber-600 hover:bg-amber-100 transition-colors">
-            <AlertTriangle size={13} /> Expiring Soon
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+            <Download size={14} /> Billing History
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-[12px] font-bold shadow-sm transition-all">
+            <Plus size={14} /> Create Plan
           </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50/50 text-[11px] text-slate-500 font-bold tracking-wide border-b border-slate-100">
-            <tr>
-              {[
-                "Company",
-                "Plan",
-                "Start Date",
-                "Renewal Date",
-                "Amount",
-                "Status",
-                "Actions",
-              ].map((h) => (
-                <th key={h} className="px-5 py-4">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {subscriptionRecords.map((r) => (
-              <RecordRow key={r.id} record={r} />
-            ))}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {subscriptionPlans.map((plan) => (
+          <PlanCard key={plan.id} plan={plan} />
+        ))}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-50">
+          <h2 className="font-bold text-slate-800 text-sm">
+            Subscription Records
+          </h2>
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"
+                size={14}
+              />
+              <input
+                type="text"
+                placeholder="Search company..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 pr-4 py-2 bg-slate-50 rounded-lg text-xs w-48 focus:ring-1 focus:ring-teal-500 outline-none"
+              />
+            </div>
+            <button className="flex items-center gap-2 px-3 py-2 border border-amber-200 bg-amber-50 rounded-lg text-[11px] font-bold text-amber-600 hover:bg-amber-100 transition-colors">
+              <AlertTriangle size={13} /> Expiring Soon
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50/50 text-[11px] text-slate-500 font-bold tracking-wide border-b border-slate-100">
+              <tr>
+                {[
+                  "Company",
+                  "Plan",
+                  "Start Date",
+                  "Renewal Date",
+                  "Amount",
+                  "Status",
+                  "Actions",
+                ].map((h) => (
+                  <th key={h} className="px-5 py-4">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {loading ? (
+                <tr>
+                  <td colSpan={7}>
+                    <LoadingSpinner />
+                  </td>
+                </tr>
+              ) : (
+                records.map((r) => <RecordRow key={r.id} record={r} />)
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default SubscriptionManagement;

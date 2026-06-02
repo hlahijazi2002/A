@@ -75,7 +75,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] space-y-6">
+    <div className=" bg-[#f8fafc] space-y-6">
       {/*  Header  */}
       <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
@@ -130,9 +130,9 @@ const Dashboard = () => {
       </div>
 
       {/*  Recent Companies + Side cards  */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* Table */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden self-start h-fit">
           <div className="flex justify-between items-center px-5 py-4 border-b border-slate-50">
             <h3 className="font-bold text-slate-900 text-sm">
               Recent Companies
@@ -157,7 +157,7 @@ const Dashboard = () => {
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 align-top">
                 {loading ? (
                   <tr>
                     <td colSpan={5}>

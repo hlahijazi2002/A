@@ -33,13 +33,13 @@ const loginLimiter = rateLimit({
 });
 
 app.use(generalLimiter);
+app.use("/auth/login", loginLimiter); // ✅ قبل الـ routes وقبل cors/json
 
 // Middleware
 app.use(cors({ origin: process.env.ADMIN_FRONTEND_URL }));
 app.use(express.json());
 
 // Routes
-app.use("/auth/login", loginLimiter);
 app.use("/auth", authRoutes);
 app.use("/orgs", orgsRoutes);
 app.use("/users", usersRoutes);

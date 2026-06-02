@@ -1,6 +1,14 @@
 const mockData = require("../config/mockData");
 const MOCK_MODE = process.env.MOCK_MODE === "true";
 
+const ALLOWED_ROLES = [
+  "SUPER_ADMIN",
+  "ADMINISTRATOR",
+  "DATA_CONTRIBUTOR",
+  "ANALYST",
+  "VIEWER",
+];
+
 //  Get All Users
 const getUsers = async (req, res) => {
   try {
@@ -20,15 +28,17 @@ const getUsers = async (req, res) => {
       if (role) data = data.filter((u) => u.role === role);
       if (orgId) data = data.filter((u) => u.organizationId === orgId);
 
+      // ✅ Pagination slicing
+      const paginated = data.slice((page - 1) * limit, page * limit);
+
       return res.json({
-        data,
+        data: paginated,
         total: data.length,
         page: Number(page),
         limit: Number(limit),
         totalPages: Math.ceil(data.length / limit),
       });
     }
-    // Real API — coming soon
     return res
       .status(501)
       .json({ error: "Not implemented. Waiting for Carbon App API." });
@@ -46,7 +56,6 @@ const getUserById = async (req, res) => {
       if (!user) return res.status(404).json({ error: "User not found." });
       return res.json(user);
     }
-    // Real API — coming soon
     return res
       .status(501)
       .json({ error: "Not implemented. Waiting for Carbon App API." });
@@ -59,14 +68,19 @@ const getUserById = async (req, res) => {
 //  Update User Status
 const updateUserStatus = async (req, res) => {
   try {
+    const { isActive } = req.body;
+
+    // ✅ Validation
+    if (typeof isActive !== "boolean") {
+      return res.status(400).json({ error: "isActive must be a boolean." });
+    }
+
     if (MOCK_MODE) {
-      const { isActive } = req.body;
       const user = mockData.users.find((u) => u.id === req.params.id);
       if (!user) return res.status(404).json({ error: "User not found." });
-
       user.isActive = isActive;
       return res.json({ success: true, user });
-    } // Real API — coming soon
+    }
     return res
       .status(501)
       .json({ error: "Not implemented. Waiting for Carbon App API." });
@@ -79,15 +93,21 @@ const updateUserStatus = async (req, res) => {
 //  Update User Role
 const updateUserRole = async (req, res) => {
   try {
+    const { role } = req.body;
+
+    // ✅ Validation
+    if (!role || !ALLOWED_ROLES.includes(role)) {
+      return res
+        .status(400)
+        .json({ error: `Invalid role. Allowed: ${ALLOWED_ROLES.join(", ")}` });
+    }
+
     if (MOCK_MODE) {
-      const { role } = req.body;
       const user = mockData.users.find((u) => u.id === req.params.id);
       if (!user) return res.status(404).json({ error: "User not found." });
-
       user.role = role;
       return res.json({ success: true, user });
     }
-    // Real API — coming soon
     return res
       .status(501)
       .json({ error: "Not implemented. Waiting for Carbon App API." });

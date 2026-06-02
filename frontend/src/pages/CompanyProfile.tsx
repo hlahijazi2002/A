@@ -5,23 +5,7 @@ import { MapPin, Briefcase, Mail, Calendar, Edit2 } from "lucide-react";
 import { companyProfile } from "../../data/data";
 import type { CompanyProfileModule } from "../../data/data";
 import { Link } from "react-router-dom";
-
-const Toggle = ({
-  enabled,
-  onChange,
-}: {
-  enabled: boolean;
-  onChange: () => void;
-}) => (
-  <button
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${enabled ? "bg-teal-600" : "bg-slate-200"}`}
-  >
-    <span
-      className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${enabled ? "translate-x-6" : "translate-x-1"}`}
-    />
-  </button>
-);
+import Toggle from "../components/Toggle";
 
 type TabName =
   | "Overview"
@@ -40,22 +24,37 @@ const SCOPE_COLORS = ["bg-teal-600", "bg-teal-400", "bg-teal-200"];
 
 const CompanyProfile = () => {
   const [activeTab, setActiveTab] = useState<TabName>("Overview");
-  const [modules, setModules] = useState<CompanyProfileModule[]>(p.modules);
   const { id } = useParams();
   const [orgData, setOrgData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const p = orgData || companyProfile;
+  const [modules, setModules] = useState<CompanyProfileModule[]>(
+    companyProfile.modules,
+  );
 
   useEffect(() => {
     if (id) {
       api
         .get(`/orgs/${id}`)
-        .then((res) => setOrgData(res))
-        .catch(() => {})
+        .then((res) => {
+          setOrgData(res);
+          if (res.modules) setModules(res.modules);
+        })
+        .catch(() => {
+          setOrgData(null);
+        })
         .finally(() => setLoading(false));
     }
   }, [id]);
 
-  const p = orgData || companyProfile;
+  //  loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-slate-400 text-sm">Loading...</p>
+      </div>
+    );
+  }
 
   const toggleModule = (id: string) =>
     setModules((prev) =>
@@ -128,11 +127,14 @@ const CompanyProfile = () => {
       {/* Stats */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-slate-100">
         {[
-          { label: "Total Users", value: String(p.stats.totalUsers) },
-          { label: "tCO₂e Emissions", value: p.stats.emissions },
-          { label: "Monthly Revenue", value: p.stats.monthlyRevenue },
-          { label: "Data Completeness", value: p.stats.dataCompleteness },
-          { label: "Modules Active", value: p.stats.modulesActive },
+          { label: "Total Users", value: String(p.stats?.totalUsers ?? "-") },
+          { label: "tCO₂e Emissions", value: p.stats?.emissions ?? "-" },
+          { label: "Monthly Revenue", value: p.stats?.monthlyRevenue ?? "-" },
+          {
+            label: "Data Completeness",
+            value: p.stats?.dataCompleteness ?? "-",
+          },
+          { label: "Modules Active", value: p.stats?.modulesActive ?? "-" },
         ].map((stat, i) => (
           <div key={i} className="px-4 py-4 text-center">
             <p className="text-xl font-black text-slate-900 mb-1">
@@ -174,7 +176,7 @@ const CompanyProfile = () => {
                 Company Details
               </h3>
               <div className="divide-y divide-slate-100">
-                {Object.entries(p.details).map(([key, val]) => (
+                {Object.entries(p.details ?? {}).map(([key, val]) => (
                   <div
                     key={key}
                     className="flex items-start justify-between py-2.5 first:pt-0 last:pb-0"
@@ -197,7 +199,7 @@ const CompanyProfile = () => {
                   Scope Summary (2024)
                 </h3>
                 <div className="space-y-4">
-                  {p.scopeSummary.map((scope, i) => (
+                  {(p.scopeSummary ?? []).map((scope, i) => (
                     <div key={scope.label}>
                       <div className="flex justify-between mb-1.5">
                         <span className="text-[12px] font-bold text-slate-700">

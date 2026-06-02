@@ -1,5 +1,7 @@
 import { Plus } from "lucide-react";
-import { partnerStats, partners, type Partner } from "../../data/data";
+import { partnerStats, type Partner } from "../../data/data";
+import useFetch from "../hooks/useFetch";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const tierColors = {
   Gold: "bg-orange-100 text-orange-600",
@@ -54,54 +56,66 @@ const PartnerCard = ({ partner }: { partner: Partner }) => (
   </div>
 );
 
-const PartnerManagement = () => (
-  <div className="min-h-screen bg-slate-50/30 space-y-6">
-    {/* Header */}
-    <div className="flex flex-wrap justify-between items-center gap-3">
-      <div>
-        <h1 className="text-xl font-bold text-slate-800">Partner Management</h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Resellers, consultants, and integration partners
-        </p>
-      </div>
-      <button className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-[12px] font-bold shadow-sm transition-colors">
-        <Plus size={14} /> Add Partner
-      </button>
-    </div>
+const PartnerManagement = () => {
+  const { data, loading } = useFetch<{ data: Partner[] }>("/partners", {
+    data: [],
+  });
+  const partnersList = data?.data || [];
 
-    {/* Stats */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      {partnerStats.map((stat, i) => (
-        <div
-          key={i}
-          className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"
-        >
-          <p className="text-xs text-slate-500 mb-2">{stat.label}</p>
-          <div className="flex justify-between items-center">
-            <p className="text-xl font-bold text-slate-800">{stat.val}</p>
-            <div
-              className={`w-9 h-9 rounded-lg ${stat.iconBg} flex items-center justify-center`}
-            >
-              <div className="w-4 h-4 border-2 border-current opacity-40 rounded-sm" />
-            </div>
-          </div>
-          <p className="text-xs mt-1.5 text-slate-400">
-            {stat.trend && (
-              <span className="text-emerald-500 mr-1">{stat.trend}</span>
-            )}
-            {stat.sub}
+  return (
+    <div className="min-h-screen bg-slate-50/30 space-y-6">
+      {/* Header */}
+      <div className="flex flex-wrap justify-between items-center gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800">
+            Partner Management
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Resellers, consultants, and integration partners
           </p>
         </div>
-      ))}
-    </div>
+        <button className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-[12px] font-bold shadow-sm transition-colors">
+          <Plus size={14} /> Add Partner
+        </button>
+      </div>
 
-    {/* Cards */}
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      {partners.map((partner) => (
-        <PartnerCard key={partner.id} partner={partner} />
-      ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {partnerStats.map((stat) => (
+          <div
+            key={stat.label}
+            className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"
+          >
+            <p className="text-xs text-slate-500 mb-2">{stat.label}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-xl font-bold text-slate-800">{stat.val}</p>
+              <div
+                className={`w-9 h-9 rounded-lg ${stat.iconBg} flex items-center justify-center`}
+              >
+                <div className="w-4 h-4 border-2 border-current opacity-40 rounded-sm" />
+              </div>
+            </div>
+            <p className="text-xs mt-1.5 text-slate-400">
+              {stat.trend && (
+                <span className="text-emerald-500 mr-1">{stat.trend}</span>
+              )}
+              {stat.sub}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Cards */}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {partnersList.map((partner) => (
+            <PartnerCard key={partner.id} partner={partner} />
+          ))}
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export default PartnerManagement;
