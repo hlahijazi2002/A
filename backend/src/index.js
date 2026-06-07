@@ -1,8 +1,9 @@
+require("dotenv").config();
+
 const express = require("express");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
-require("dotenv").config();
 
 const authRoutes = require("./routes/auth");
 const orgsRoutes = require("./routes/orgs");
@@ -11,6 +12,7 @@ const analyticsRoutes = require("./routes/analytics");
 const auditLogsRoutes = require("./routes/auditLogs");
 const notificationsRoutes = require("./routes/notifications");
 const partnersRoutes = require("./routes/partners");
+const featuresRoutes = require("./routes/features");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,7 +23,7 @@ app.use(helmet());
 // General rate limit: max 100 requests per 15 minutes
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000,
   message: { error: "Too many requests, please try again later." },
 });
 
@@ -33,7 +35,7 @@ const loginLimiter = rateLimit({
 });
 
 app.use(generalLimiter);
-app.use("/auth/login", loginLimiter); // ✅ قبل الـ routes وقبل cors/json
+app.use("/auth/login", loginLimiter);
 
 // Middleware
 app.use(cors({ origin: process.env.ADMIN_FRONTEND_URL }));
@@ -47,6 +49,7 @@ app.use("/analytics", analyticsRoutes);
 app.use("/audit-logs", auditLogsRoutes);
 app.use("/notifications", notificationsRoutes);
 app.use("/partners", partnersRoutes);
+app.use("/features", featuresRoutes);
 
 // Health check
 app.get("/health", (req, res) => {

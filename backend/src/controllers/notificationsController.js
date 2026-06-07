@@ -1,40 +1,31 @@
-const mockData = require("../config/mockData");
-const MOCK_MODE = process.env.MOCK_MODE === "true";
+const carbonApi = require("../config/carbonApi");
 
-//  Broadcast Notification
 const broadcast = async (req, res) => {
   try {
     const { title, message, type, orgIds } = req.body;
 
-    // Validate required fields
     if (!title || !message || !type) {
-      return res.status(400).json({
-        error: "title, message, and type are required.",
-      });
+      return res
+        .status(400)
+        .json({ error: "title, message, and type are required." });
     }
 
     const validTypes = ["INFO", "WARNING", "CRITICAL"];
     if (!validTypes.includes(type)) {
-      return res.status(400).json({
-        error: "type must be INFO, WARNING, or CRITICAL.",
-      });
+      return res
+        .status(400)
+        .json({ error: "type must be INFO, WARNING, or CRITICAL." });
     }
 
-    if (MOCK_MODE) {
-      return res.json({
-        success: true,
-        message: "Notification sent successfully.",
-        sentTo: orgIds && orgIds.length > 0 ? orgIds : ["all organizations"],
-        notification: { title, message, type },
-      });
-    }
-    // Real API — coming soon
-    return res
-      .status(501)
-      .json({ error: "Not implemented. Waiting for Carbon App API." });
+    const body = { title, message, type };
+    if (orgIds && orgIds.length > 0) body.orgIds = orgIds;
+
+    const response = await carbonApi.post("/notifications/broadcast", body);
+    return res.json(response.data);
   } catch (err) {
-    console.error("broadcast error:", err);
-    res.status(500).json({ error: "Server error." });
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
   }
 };
 

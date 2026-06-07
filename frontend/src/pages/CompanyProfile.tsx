@@ -27,6 +27,7 @@ const CompanyProfile = () => {
   const { id } = useParams();
   const [orgData, setOrgData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [suspending, setSuspending] = useState(false);
   const p = orgData || companyProfile;
   const [modules, setModules] = useState<CompanyProfileModule[]>(
     companyProfile.modules,
@@ -37,17 +38,63 @@ const CompanyProfile = () => {
       api
         .get(`/orgs/${id}`)
         .then((res) => {
-          setOrgData(res);
-          if (res.modules) setModules(res.modules);
+          const org = res.data || res;
+          const mapped = {
+            ...org,
+            name: org.name,
+            status: org.isActive ? "Active" : "Suspended",
+            plan: org.subscriptionPlan,
+            location: org.headquarterAddress || "—",
+            industry: org.sectorIsicCode || "—",
+            adminEmail: org.pocEmail || "—",
+            joinedDate: org.createdAt
+              ? new Date(org.createdAt).toLocaleDateString()
+              : "—",
+            initial: org.name?.charAt(0).toUpperCase(),
+            avatarBg: "bg-teal-50",
+            avatarText: "text-teal-600",
+            stats: {
+              totalUsers: org._count?.users ?? "-",
+              emissions: org.totalCo2e ?? "-",
+              monthlyRevenue: "-",
+              dataCompleteness: "-",
+              modulesActive: org.resolvedFeatures
+                ? `${Object.values(org.resolvedFeatures).filter((v) => v === true).length} / ${Object.values(org.resolvedFeatures).filter((v) => typeof v === "boolean").length}`
+                : "-",
+            },
+            details: {
+              "Legal Name": org.legalName || "—",
+              "Registration No.": org.commercialRegistrationNumber || "—",
+              Headquarters: org.headquarterAddress || "—",
+              Employees: org.employeeCount || "—",
+              Revenue: org.revenueAmount
+                ? `${org.revenueAmount} ${org.revenueCurrency || ""}`
+                : "—",
+              Subscription: org.subscriptionPlan,
+              Status: org.subscriptionStatus,
+              Contact: org.pocFullName || "—",
+            },
+            modules: org.resolvedFeatures
+              ? Object.entries(org.resolvedFeatures)
+                  .filter(
+                    ([key]) => typeof org.resolvedFeatures[key] === "boolean",
+                  )
+                  .map(([key, val]) => ({
+                    id: key,
+                    label: key,
+                    enabled: val as boolean,
+                  }))
+              : companyProfile.modules,
+            scopeSummary: [],
+          };
+          setOrgData(mapped);
+          setModules(mapped.modules);
         })
-        .catch(() => {
-          setOrgData(null);
-        })
+        .catch(() => setOrgData(null))
         .finally(() => setLoading(false));
     }
   }, [id]);
 
-  //  loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -56,10 +103,45 @@ const CompanyProfile = () => {
     );
   }
 
-  const toggleModule = (id: string) =>
-    setModules((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, enabled: !m.enabled } : m)),
+  const handleSuspend = async () => {
+    if (!id) return;
+    const isActive = p.isActive ?? true;
+    const action = isActive ? "suspend" : "reactivate";
+    if (!confirm(`Are you sure you want to ${action} this company?`)) return;
+
+    setSuspending(true);
+    try {
+      const res = await api.patch(`/orgs/${id}/status`, {
+        isActive: !isActive,
+        reason: `${action}d via admin dashboard`,
+      });
+      setOrgData((prev: any) => ({ ...prev, isActive: !isActive }));
+    } catch {
+      alert("Failed to update company status. Please try again.");
+    } finally {
+      setSuspending(false);
+    }
+  };
+
+  const toggleModule = async (moduleId: string) => {
+    if (!id) return;
+    const updated = modules.map((m) =>
+      m.id === moduleId ? { ...m, enabled: !m.enabled } : m,
     );
+    setModules(updated);
+
+    try {
+      const featureUpdate = {
+        [moduleId]: updated.find((m) => m.id === moduleId)?.enabled,
+      };
+      await api.patch(`/features/${id}`, featureUpdate);
+    } catch {
+      setModules(modules);
+      alert("Failed to update module. Please try again.");
+    }
+  };
+
+  const isSuspended = !(p.isActive ?? true);
 
   return (
     <div className="min-h-screen bg-slate-50/30 space-y-4">
@@ -73,13 +155,29 @@ const CompanyProfile = () => {
           <span className="text-slate-700 font-bold">{p.name}</span>
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+          <button
+            disabled
+            title="Coming soon"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-300 cursor-not-allowed"
+          >
             <Edit2 size={13} /> Edit
           </button>
-          <button className="px-4 py-2 bg-white border border-amber-300 text-amber-600 rounded-lg text-[12px] font-bold hover:bg-amber-50 transition-colors">
-            Suspend
+          <button
+            onClick={handleSuspend}
+            disabled={suspending}
+            className={`px-4 py-2 rounded-lg text-[12px] font-bold transition-colors ${
+              isSuspended
+                ? "bg-white border border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                : "bg-white border border-amber-300 text-amber-600 hover:bg-amber-50"
+            }`}
+          >
+            {suspending ? "..." : isSuspended ? "Reactivate" : "Suspend"}
           </button>
-          <button className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[12px] font-bold shadow-sm transition-colors">
+          <button
+            disabled
+            title="Coming soon"
+            className="px-4 py-2 bg-rose-100 text-rose-300 rounded-lg text-[12px] font-bold cursor-not-allowed"
+          >
             Delete
           </button>
         </div>
@@ -96,12 +194,16 @@ const CompanyProfile = () => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-2">
               <h2 className="text-lg font-black text-slate-900">{p.name}</h2>
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                {p.status}
+              <span
+                className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full ${isSuspended ? "text-rose-600 bg-rose-50" : "text-emerald-600 bg-emerald-50"}`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${isSuspended ? "bg-rose-500" : "bg-emerald-500"}`}
+                />
+                {isSuspended ? "Suspended" : p.status || "Active"}
               </span>
               <span className="text-[10px] px-2.5 py-1 rounded-md font-black uppercase bg-linear-to-r from-[#0a1a16] via-[#142e29] to-[#1a5546] text-amber-400">
-                {p.plan}
+                {p.plan || p.subscriptionPlan}
               </span>
             </div>
             <div className="flex flex-wrap gap-4">
@@ -127,7 +229,10 @@ const CompanyProfile = () => {
       {/* Stats */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-slate-100">
         {[
-          { label: "Total Users", value: String(p.stats?.totalUsers ?? "-") },
+          {
+            label: "Total Users",
+            value: String(p.stats?.totalUsers ?? p._count?.users ?? "-"),
+          },
           { label: "tCO₂e Emissions", value: p.stats?.emissions ?? "-" },
           { label: "Monthly Revenue", value: p.stats?.monthlyRevenue ?? "-" },
           {
@@ -170,7 +275,6 @@ const CompanyProfile = () => {
 
         {activeTab === "Overview" && (
           <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {/* Company Details */}
             <div className="bg-slate-50/50 rounded-xl border border-slate-100 p-5">
               <h3 className="text-[13px] font-bold text-slate-800 mb-4">
                 Company Details
@@ -185,7 +289,7 @@ const CompanyProfile = () => {
                       {key}
                     </span>
                     <span className="text-[12px] font-bold text-slate-800 text-right">
-                      {val}
+                      {val as string}
                     </span>
                   </div>
                 ))}
@@ -193,13 +297,12 @@ const CompanyProfile = () => {
             </div>
 
             <div className="space-y-5">
-              {/* Scope Summary */}
               <div className="bg-slate-50/50 rounded-xl border border-slate-100 p-5">
                 <h3 className="text-[13px] font-bold text-slate-800 mb-4">
-                  Scope Summary (2024)
+                  Scope Summary (2026)
                 </h3>
                 <div className="space-y-4">
-                  {(p.scopeSummary ?? []).map((scope, i) => (
+                  {(p.scopeSummary ?? []).map((scope: any, i: number) => (
                     <div key={scope.label}>
                       <div className="flex justify-between mb-1.5">
                         <span className="text-[12px] font-bold text-slate-700">
@@ -220,7 +323,6 @@ const CompanyProfile = () => {
                 </div>
               </div>
 
-              {/* Modules */}
               <div className="bg-slate-50/50 rounded-xl border border-slate-100 p-5">
                 <h3 className="text-[13px] font-bold text-slate-800 mb-4">
                   Active Modules

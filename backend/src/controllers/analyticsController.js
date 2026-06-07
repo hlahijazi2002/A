@@ -1,34 +1,30 @@
-const mockData = require("../config/mockData");
-const MOCK_MODE = process.env.MOCK_MODE === "true";
+const carbonApi = require("../config/carbonApi");
 
-//  Emissions
 const getEmissions = async (req, res) => {
   try {
-    if (MOCK_MODE) {
-      return res.json(mockData.analytics.emissions);
-    }
-    // Real API — coming soon
-    return res
-      .status(501)
-      .json({ error: "Not implemented. Waiting for Carbon App API." });
+    const { year, sector } = req.query;
+
+    const params = {};
+    if (year) params.year = year;
+    if (sector) params.sector = sector;
+
+    const response = await carbonApi.get("/analytics/emissions", { params });
+    return res.json(response.data);
   } catch (err) {
-    console.error("getEmissions error:", err);
-    res.status(500).json({ error: "Server error." });
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
   }
 };
-//  Platform Summary
+
 const getSummary = async (req, res) => {
   try {
-    if (MOCK_MODE) {
-      return res.json(mockData.analytics.summary);
-    }
-    // Real API — coming soon
-    return res
-      .status(501)
-      .json({ error: "Not implemented. Waiting for Carbon App API." });
+    const response = await carbonApi.get("/analytics/summary");
+    return res.json(response.data);
   } catch (err) {
-    console.error("getSummary error:", err);
-    res.status(500).json({ error: "Server error." });
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
   }
 };
 

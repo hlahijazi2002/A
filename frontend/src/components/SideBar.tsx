@@ -17,9 +17,23 @@ import { api } from "../api/client";
 
 const SECTIONS = ["OVERVIEW", "MANAGEMENT", "SYSTEM"] as const;
 
+const getAdminInfo = () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return { name: "Super Admin", initials: "SA" };
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const name = payload.name || payload.email?.split("@")[0] || "Super Admin";
+    const initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+    return { name, initials };
+  } catch {
+    return { name: "Super Admin", initials: "SA" };
+  }
+};
+
 const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
   const [badges, setBadges] = useState({ subscriptions: 0, notifications: 0 });
   const navigate = useNavigate();
+  const admin = getAdminInfo();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -31,9 +45,10 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
     api
       .get("/analytics/summary")
       .then((res) => {
+        const data = res.data || res;
         setBadges({
-          subscriptions: res.expiringSubscriptions || 0,
-          notifications: res.unreadNotifications || 0,
+          subscriptions: data.newOrgs30d || 0,
+          notifications: 0,
         });
       })
       .catch(() => {});
@@ -140,9 +155,7 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
                 >
                   {({ isActive }) => (
                     <>
-                      <span
-                        className={isActive ? "text-white" : "text-slate-400"}
-                      >
+                      <span className={isActive ? "text-white" : "text-slate-400"}>
                         {item.icon}
                       </span>
                       <span>{item.title}</span>
@@ -162,19 +175,14 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
       <div className="p-3 border-t border-slate-200 bg-white shrink-0">
         <div className="flex items-center gap-2 px-2 py-1.5">
           <div className="w-7 h-7 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold text-xs shrink-0">
-            SA
+            {admin.initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-bold text-slate-900 truncate">
-              Super Admin
-            </p>
+            <p className="text-[11px] font-bold text-slate-900 truncate">{admin.name}</p>
             <p className="text-[9px] text-slate-500 truncate">Platform Admin</p>
           </div>
           <button onClick={handleLogout}>
-            <LogOut
-              size={14}
-              className="text-slate-400 hover:text-red-500 transition-colors"
-            />
+            <LogOut size={14} className="text-slate-400 hover:text-red-500 transition-colors" />
           </button>
         </div>
       </div>

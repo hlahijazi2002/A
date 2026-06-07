@@ -1,7 +1,4 @@
-
 import { FileText, ShieldAlert, UserCog } from "lucide-react";
-
-
 
 export type CompanyStatus = "Active" | "Trial" | "Suspended" | "Churned";
 export type PlanName = "Enterprise" | "Pro" | "Professional" | "Starter";
@@ -64,7 +61,7 @@ export const companies: Company[] = [
     users: 6,
     emissions: "2,100",
     status: "Trial",
-    joined: "Jan 2024",
+    joined: "Jan 2026",
     initial: "R",
     color: "bg-purple-50 text-purple-600",
   },
@@ -139,7 +136,7 @@ export const platformTotals: PlatformTotals = {
   platformMRR: "$84,200",
   totalEmissions: "1.84M",
   emissionsTrend: "-6.7%",
-  year: "2024",
+  year: "2026",
 };
 
 // ─────────────────────────────────────────────
@@ -296,7 +293,7 @@ export interface EmissionStat {
 export const emissionsStats: EmissionStat[] = [
   {
     title: "Total Platform Emissions",
-    sub: "tCO2e 2024",
+    sub: "tCO2e 2026",
     value: "1.84M",
     trend: "-6.7%",
     vs: "vs 2023",
@@ -354,7 +351,7 @@ export const emissionsTrend: EmissionTrendYear[] = [
   { year: 2021, scope1HeightPct: 45, scope2HeightPct: 35, scope3HeightPct: 65 },
   { year: 2022, scope1HeightPct: 53, scope2HeightPct: 40, scope3HeightPct: 55 },
   { year: 2023, scope1HeightPct: 61, scope2HeightPct: 45, scope3HeightPct: 45 },
-  { year: 2024, scope1HeightPct: 69, scope2HeightPct: 50, scope3HeightPct: 35 },
+  { year: 2026, scope1HeightPct: 69, scope2HeightPct: 50, scope3HeightPct: 35 },
 ];
 
 export interface SectorBreakdown {
@@ -645,7 +642,7 @@ export const subscriptionRecords: SubscriptionRecord[] = [
     id: "SUB-001",
     company: "Nexgen Steels",
     plan: "Enterprise",
-    startDate: "01 Apr 2024",
+    startDate: "01 Apr 2026",
     renewalDate: "31 Mar 2025",
     amount: "$4,200/mo",
     status: "Active",
@@ -654,8 +651,8 @@ export const subscriptionRecords: SubscriptionRecord[] = [
     id: "SUB-002",
     company: "RetailCore Inc.",
     plan: "Starter",
-    startDate: "15 Jan 2024",
-    renewalDate: "14 Feb 2024",
+    startDate: "15 Jan 2026",
+    renewalDate: "14 Feb 2026",
     amount: "$99/mo",
     status: "Expiring",
   },
@@ -664,7 +661,7 @@ export const subscriptionRecords: SubscriptionRecord[] = [
     company: "GreenFleet Co.",
     plan: "Professional",
     startDate: "01 Jun 2023",
-    renewalDate: "31 May 2024",
+    renewalDate: "31 May 2026",
     amount: "$299/mo",
     status: "Renewal Due",
   },
@@ -673,7 +670,7 @@ export const subscriptionRecords: SubscriptionRecord[] = [
     company: "AquaTech Ltd.",
     plan: "Enterprise",
     startDate: "01 Nov 2022",
-    renewalDate: "31 Oct 2024",
+    renewalDate: "31 Oct 2026",
     amount: "$3,800/mo",
     status: "Active",
   },
@@ -682,7 +679,7 @@ export const subscriptionRecords: SubscriptionRecord[] = [
     company: "FarmLink Agri.",
     plan: "Starter",
     startDate: "01 Apr 2023",
-    renewalDate: "31 Mar 2024",
+    renewalDate: "31 Mar 2026",
     amount: "$99/mo",
     status: "Suspended",
   },
@@ -848,7 +845,7 @@ export interface AuditEvent {
 export const auditEvents: AuditEvent[] = [
   {
     id: 1,
-    timestamp: "2024-05-12 14:32:11",
+    timestamp: "2026-05-12 14:32:11",
     user: "Meera Patel",
     action: "User Role Updated",
     resource: "User: Priya Sinha",
@@ -858,7 +855,7 @@ export const auditEvents: AuditEvent[] = [
   },
   {
     id: 2,
-    timestamp: "2024-05-12 13:18:04",
+    timestamp: "2026-05-12 13:18:04",
     user: "System",
     action: "Subscription Expired",
     resource: "Plan: Starter",
@@ -868,7 +865,7 @@ export const auditEvents: AuditEvent[] = [
   },
   {
     id: 3,
-    timestamp: "2024-05-12 12:05:33",
+    timestamp: "2026-05-12 12:05:33",
     user: "Arjun Sharma",
     action: "Company Data Exported",
     resource: "Emissions Report 2023",
@@ -878,7 +875,7 @@ export const auditEvents: AuditEvent[] = [
   },
   {
     id: 4,
-    timestamp: "2024-05-12 11:44:22",
+    timestamp: "2026-05-12 11:44:22",
     user: "Unknown",
     action: "Failed Login (3x)",
     resource: "Admin Portal",
@@ -888,7 +885,7 @@ export const auditEvents: AuditEvent[] = [
   },
   {
     id: 5,
-    timestamp: "2024-05-12 10:30:00",
+    timestamp: "2026-05-12 10:30:00",
     user: "Meera Patel",
     action: "New Company Added",
     resource: "Company: RetailCore",
@@ -898,7 +895,7 @@ export const auditEvents: AuditEvent[] = [
   },
   {
     id: 6,
-    timestamp: "2024-05-11 17:22:10",
+    timestamp: "2026-05-11 17:22:10",
     user: "Dev Khanna",
     action: "2FA Disabled",
     resource: "Account Settings",
@@ -908,7 +905,7 @@ export const auditEvents: AuditEvent[] = [
   },
   {
     id: 7,
-    timestamp: "2024-05-11 16:05:55",
+    timestamp: "2026-05-11 16:05:55",
     user: "Suresh Nair",
     action: "Emissions Data Submitted",
     resource: "Scope 3 - Cat. 1",
@@ -918,7 +915,7 @@ export const auditEvents: AuditEvent[] = [
   },
   {
     id: 8,
-    timestamp: "2024-05-11 15:11:43",
+    timestamp: "2026-05-11 15:11:43",
     user: "System",
     action: "Automated Backup",
     resource: "Platform Database",

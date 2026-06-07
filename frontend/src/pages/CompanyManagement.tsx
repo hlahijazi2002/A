@@ -3,8 +3,6 @@ import {
   Plus,
   Download,
   Search,
-  Filter,
-  ChevronDown,
   Eye,
   Edit2,
   Ban,
@@ -30,17 +28,51 @@ const TABS = ["All Companies", "Active", "Trial", "Suspended", "Churned"];
 const CompanyManagement = () => {
   const [activeTab, setActiveTab] = useState("All Companies");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [planFilter, setPlanFilter] = useState("");
 
-  const { data, loading } = useFetch<{ data: Company[] }>("/orgs?limit=20", {
-    data: [],
-  });
+  const tabParam =
+    activeTab === "Active"
+      ? "&isActive=true"
+      : activeTab === "Suspended"
+        ? "&isActive=false"
+        : "";
 
-  const companies = (data?.data || []).filter((row) => {
-    const matchTab = activeTab === "All Companies" || row.status === activeTab;
-    const matchSearch = row.name.toLowerCase().includes(search.toLowerCase());
-    return matchTab && matchSearch;
-  });
+  const planParam = planFilter ? `&subscriptionPlan=${planFilter}` : "";
+  const { data, loading } = useFetch<{ data: Company[] }>(
+    `/orgs?limit=20&page=${currentPage}${tabParam}${planParam}&search=${search}`,
+    {
+      data: [],
+    },
+  );
+  const total = data?.data?.total || data?.total || 0;
+  const totalPages = Math.ceil(total / 20);
 
+  const rawData = Array.isArray(data?.data?.data)
+    ? data.data.data
+    : Array.isArray(data?.data)
+      ? data.data
+      : [];
+  const companies = rawData
+    .map((org: any) => ({
+      ...org,
+      status: org.isActive ? "Active" : "Suspended",
+      ind: org.sector || "N/A",
+      plan: org.subscriptionPlan || "Starter",
+      initial: org.name?.charAt(0).toUpperCase(),
+      color: "bg-teal-50 text-teal-600",
+      users: org.employeesCount || 0,
+      emissions: "—",
+      joined: org.createdAt
+        ? new Date(org.createdAt).toLocaleDateString()
+        : "—",
+    }))
+    .filter((row: any) => {
+      const matchTab =
+        activeTab === "All Companies" || row.status === activeTab;
+      const matchSearch = row.name.toLowerCase().includes(search.toLowerCase());
+      return matchTab && matchSearch;
+    });
   return (
     <div className="min-h-screen bg-slate-50/30 space-y-6">
       {/* Header */}
@@ -50,20 +82,16 @@ const CompanyManagement = () => {
             Company Management
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            {data?.total || 0} companies registered
+            {data?.data?.total || data?.total || 0} companies registered
           </p>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600">
-            <Download size={14} /> Export CSV
-          </button>
-          <Link
-            to="/addCompany"
-            className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-[11px] font-bold shadow-sm transition-all"
-          >
-            <Plus size={14} /> Add Company
-          </Link>
-        </div>
+
+        <Link
+          to="/addCompany"
+          className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-[11px] font-bold shadow-sm transition-all"
+        >
+          <Plus size={14} /> Add Company
+        </Link>
       </div>
 
       {/* Tabs */}
@@ -101,12 +129,16 @@ const CompanyManagement = () => {
                 className="pl-9 pr-4 py-2 bg-slate-50 rounded-lg text-xs w-52 focus:ring-1 focus:ring-teal-500 outline-none"
               />
             </div>
-            <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg text-xs font-bold text-slate-500">
-              <Filter size={13} /> Filters
-            </button>
-            <button className="flex items-center gap-3 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700">
-              Logistics <ChevronDown size={13} className="text-slate-400" />
-            </button>
+            <select
+              value={planFilter}
+              onChange={(e) => setPlanFilter(e.target.value)}
+              className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 outline-none"
+            >
+              <option value="">All Plans</option>
+              <option value="STARTER">Starter</option>
+              <option value="PROFESSIONAL">Professional</option>
+              <option value="ENTERPRISE">Enterprise</option>
+            </select>
           </div>
         </div>
 
@@ -114,12 +146,6 @@ const CompanyManagement = () => {
           <table className="w-full text-left">
             <thead className="bg-slate-50/50 text-[11px] text-slate-500 font-bold tracking-wide">
               <tr>
-                <th className="px-5 py-3">
-                  <input
-                    type="checkbox"
-                    className="rounded border-slate-300 text-teal-600"
-                  />
-                </th>
                 {[
                   "Company",
                   "Industry",
@@ -145,19 +171,13 @@ const CompanyManagement = () => {
                 </tr>
               ) : (
                 companies.map((row) => {
-                  const s = statusClass(row.status);
+                  const status = row.isActive ? "Active" : "Suspended";
+                  const s = statusClass(status);
                   return (
                     <tr
                       key={row.id}
                       className="hover:bg-slate-50/50 transition-colors relative"
                     >
-                      <td className="px-5 py-4">
-                        <input
-                          type="checkbox"
-                          className="rounded border-slate-300 text-teal-600"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </td>
                       <td className="px-4 py-4">
                         <Link
                           to={`/companyProfile/${row.id}`}
@@ -202,7 +222,7 @@ const CompanyManagement = () => {
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${s.dot}`}
                           />
-                          {row.status}
+                          {status}
                         </span>
                       </td>
                       <td className="px-4 py-4 text-[11px] text-slate-400">
@@ -236,17 +256,22 @@ const CompanyManagement = () => {
 
         <div className="p-4 flex flex-wrap justify-between items-center gap-3 border-t border-slate-50">
           <p className="text-xs text-slate-400">
-            Showing {companies.length} of {data?.total || 0} companies
+            Showing {companies.length} of{" "}
+            {data?.data?.total || data?.total || 0} companies
           </p>
           <div className="flex items-center gap-1">
             <button className="p-1.5 text-slate-300 hover:text-slate-600">
               <ChevronLeft size={15} />
             </button>
-            {[1, 2, 3, "...", 19].map((p, i) => (
+            {Array.from(
+              { length: Math.min(totalPages, 3) },
+              (_, i) => i + 1,
+            ).map((p) => (
               <button
-                key={i}
+                key={p}
+                onClick={() => setCurrentPage(p)}
                 className={`w-7 h-7 flex items-center justify-center rounded-lg text-[11px] font-bold transition-all ${
-                  p === 1
+                  p === currentPage
                     ? "bg-teal-600 text-white"
                     : "text-slate-400 hover:bg-slate-50"
                 }`}

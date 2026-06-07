@@ -157,6 +157,7 @@ interface FormState {
   regNo: string;
   taxId: string;
   employees: string;
+  plan: string;
   revenue: string;
   firstName: string;
   lastName: string;
@@ -177,6 +178,7 @@ const AddCompany = () => {
     city: "",
     website: "",
     description: "",
+    plan: "Starter",
     regNo: "",
     taxId: "",
     employees: employeeOptions[0],
@@ -463,8 +465,8 @@ const AddCompany = () => {
               <Label text="Subscription Plan" required />
               <Select
                 options={["Starter", "Professional", "Enterprise"]}
-                value="Starter"
-                onChange={() => {}}
+                value={form.plan}
+                onChange={set("plan")}
               />
             </div>
             <div>
@@ -488,6 +490,7 @@ const AddCompany = () => {
               { label: "Country", value: form.country },
               { label: "Admin Email", value: form.workEmail || "—" },
               { label: "Employees", value: form.employees },
+              { label: "Plan", value: form.plan },
             ].map(({ label, value }) => (
               <div
                 key={label}

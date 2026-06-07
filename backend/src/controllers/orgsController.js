@@ -1,111 +1,80 @@
-const mockData = require("../config/mockData");
-const MOCK_MODE = process.env.MOCK_MODE === "true";
+const carbonApi = require("../config/carbonApi");
 
 const ALLOWED_PLANS = ["FREE", "STARTER", "PROFESSIONAL", "ENTERPRISE"];
-const ALLOWED_STATUSES = ["ACTIVE", "INACTIVE", "SUSPENDED", "CANCELLED"];
+const ALLOWED_STATUSES = [
+  "TRIAL",
+  "ACTIVE",
+  "SUSPENDED",
+  "CANCELLED",
+  "EXPIRED",
+];
 
-let orgsData = [...mockData.organizations];
-
-//  Get All Organizations
 const getOrgs = async (req, res) => {
   try {
-    if (MOCK_MODE) {
-      const {
-        search,
-        subscriptionPlan,
-        isActive,
-        page = 1,
-        limit = 20,
-      } = req.query;
+    const {
+      search,
+      subscriptionPlan,
+      isActive,
+      page = 1,
+      limit = 20,
+    } = req.query;
 
-      let data = orgsData;
+    const params = { page, limit };
+    if (search) params.search = search;
+    if (subscriptionPlan) params.subscriptionPlan = subscriptionPlan;
+    if (isActive !== undefined) params.isActive = isActive;
 
-      if (search) {
-        data = data.filter((o) =>
-          o.name.toLowerCase().includes(search.toLowerCase()),
-        );
-      }
-      if (subscriptionPlan) {
-        data = data.filter((o) => o.subscriptionPlan === subscriptionPlan);
-      }
-      if (isActive !== undefined) {
-        data = data.filter((o) => o.isActive === (isActive === "true"));
-      }
-
-      // ✅ Pagination slicing
-      const paginated = data.slice((page - 1) * limit, page * limit);
-
-      return res.json({
-        data: paginated,
-        total: data.length,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(data.length / limit),
-      });
-    }
-    return res
-      .status(501)
-      .json({ error: "Not implemented. Waiting for Carbon App API." });
+    const response = await carbonApi.get("/organisations", { params });
+    return res.json(response.data);
   } catch (err) {
-    console.error("getOrgs error:", err);
-    res.status(500).json({ error: "Server error." });
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
   }
 };
 
-//  Get One Organization
 const getOrgById = async (req, res) => {
   try {
-    if (MOCK_MODE) {
-      const org = orgsData.find((o) => o.id === req.params.id);
-      if (!org)
-        return res.status(404).json({ error: "Organization not found." });
-      return res.json({ ...org, userCount: 2, totalCo2e: 3000.0 });
-    }
-    return res
-      .status(501)
-      .json({ error: "Not implemented. Waiting for Carbon App API." });
+    const response = await carbonApi.get(`/organisations/${req.params.id}`);
+    return res.json(response.data);
   } catch (err) {
-    console.error("getOrgById error:", err);
-    res.status(500).json({ error: "Server error." });
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
   }
 };
 
-//  Update Org Status
 const updateOrgStatus = async (req, res) => {
   try {
     const { isActive, reason } = req.body;
 
-    // ✅ Validation
     if (typeof isActive !== "boolean") {
       return res.status(400).json({ error: "isActive must be a boolean." });
     }
 
-    if (MOCK_MODE) {
-      const org = orgsData.find((o) => o.id === req.params.id);
-      if (!org)
-        return res.status(404).json({ error: "Organization not found." });
-      org.isActive = isActive;
-      return res.json({ success: true, org });
-    }
-    return res
-      .status(501)
-      .json({ error: "Not implemented. Waiting for Carbon App API." });
+    const body = { isActive };
+    if (reason) body.reason = reason;
+
+    const response = await carbonApi.patch(
+      `/organisations/${req.params.id}/status`,
+      body,
+    );
+    return res.json(response.data);
   } catch (err) {
-    console.error("updateOrgStatus error:", err);
-    res.status(500).json({ error: "Server error." });
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
   }
 };
 
-//  Update Org Subscription
 const updateOrgSubscription = async (req, res) => {
   try {
     const { subscriptionPlan, subscriptionStatus } = req.body;
 
-    // ✅ Validation
     if (subscriptionPlan && !ALLOWED_PLANS.includes(subscriptionPlan)) {
-      return res.status(400).json({
-        error: `Invalid plan. Allowed: ${ALLOWED_PLANS.join(", ")}`,
-      });
+      return res
+        .status(400)
+        .json({ error: `Invalid plan. Allowed: ${ALLOWED_PLANS.join(", ")}` });
     }
     if (subscriptionStatus && !ALLOWED_STATUSES.includes(subscriptionStatus)) {
       return res.status(400).json({
@@ -119,20 +88,19 @@ const updateOrgSubscription = async (req, res) => {
       });
     }
 
-    if (MOCK_MODE) {
-      const org = orgsData.find((o) => o.id === req.params.id);
-      if (!org)
-        return res.status(404).json({ error: "Organization not found." });
-      if (subscriptionPlan) org.subscriptionPlan = subscriptionPlan;
-      if (subscriptionStatus) org.subscriptionStatus = subscriptionStatus;
-      return res.json({ success: true, org });
-    }
-    return res
-      .status(501)
-      .json({ error: "Not implemented. Waiting for Carbon App API." });
+    const body = {};
+    if (subscriptionPlan) body.subscriptionPlan = subscriptionPlan;
+    if (subscriptionStatus) body.subscriptionStatus = subscriptionStatus;
+
+    const response = await carbonApi.patch(
+      `/organisations/${req.params.id}/subscription`,
+      body,
+    );
+    return res.json(response.data);
   } catch (err) {
-    console.error("updateOrgSubscription error:", err);
-    res.status(500).json({ error: "Server error." });
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
   }
 };
 

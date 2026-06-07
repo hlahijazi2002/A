@@ -34,20 +34,52 @@ const AuditLogs = () => {
   const [activeFilter, setActiveFilter] = useState("All Events");
   const [search, setSearch] = useState("");
   const [severity, setSeverity] = useState("All Severity");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, loading } = useFetch<{ data: any[] }>("/audit-logs?limit=20", {
-    data: [],
-  });
+  const actionMap: Record<string, string> = {
+    Authentication: "USER_LOGIN",
+    "User Actions": "USER_ROLE_UPDATED",
+    "Company Changes": "ORG_SUSPENDED,ORG_REACTIVATED,ORG_FEATURES_UPDATED",
+    Subscription: "SUBSCRIPTION_UPDATE",
+    System: "EMISSION_CALCULATED",
+    "Security Alerts": "ORG_REACTIVATED",
+  };
 
-  const events = (data?.data || []).filter((e) => {
+  const actionParam = actionMap[activeFilter]
+    ? `&action=${actionMap[activeFilter]}`
+    : "";
+  const searchParam = search ? `&search=${search}` : "";
+
+  const { data, loading } = useFetch<{ data: any[] }>(
+    `/audit-logs?limit=20&page=${currentPage}${actionParam}${searchParam}`,
+    { data: [] },
+  );
+
+  const total = data?.data?.total || data?.total || 0;
+  const totalPages = Math.ceil(total / 20);
+  const rawData = Array.isArray(data?.data?.data)
+    ? data.data.data
+    : Array.isArray(data?.data)
+      ? data.data
+      : [];
+  const events = rawData.filter((e) => {
+    const userName =
+      typeof e.user === "object" && e.user !== null
+        ? `${e.user?.firstName ?? ""} ${e.user?.lastName ?? ""}`.trim()
+        : typeof e.user === "string"
+          ? e.user
+          : typeof e.adminName === "string"
+            ? e.adminName
+            : "";
+    const action = typeof e.action === "string" ? e.action : "";
+
     const matchSearch =
-      e.user?.toLowerCase().includes(search.toLowerCase()) ||
-      e.action?.toLowerCase().includes(search.toLowerCase());
+      userName.toLowerCase().includes(search.toLowerCase()) ||
+      action.toLowerCase().includes(search.toLowerCase());
     const matchSeverity =
       severity === "All Severity" || e.severity === severity;
     return matchSearch && matchSeverity;
   });
-
   return (
     <div className="min-h-screen bg-slate-50/30 space-y-6">
       {/* Header */}
@@ -94,7 +126,11 @@ const AuditLogs = () => {
           >
             <p className="text-xs text-slate-500 mb-1">{stat.label}</p>
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-slate-800">{stat.count}</h2>
+              <h2 className="text-xl font-bold text-slate-800">
+                {i === 0
+                  ? data?.data?.total || data?.total || stat.count
+                  : stat.count}
+              </h2>
               <div
                 className={`w-10 h-10 ${stat.bgColor} rounded-xl flex items-center justify-center`}
               >
@@ -166,17 +202,32 @@ const AuditLogs = () => {
                     <LoadingSpinner />
                   </td>
                 </tr>
+              ) : events.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-4 py-12 text-center text-slate-400 text-sm"
+                  >
+                    No events found
+                  </td>
+                </tr>
               ) : (
-                events.map((event, i) => (
+                events.map((event) => (
                   <tr
-                    key={i}
+                    key={event.id}
                     className="hover:bg-slate-50/50 transition-colors"
                   >
                     <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
-                      {event.timestamp}
+                      {event.timestamp || event.createdAt
+                        ? new Date(
+                            event.timestamp || event.createdAt,
+                          ).toLocaleString()
+                        : "—"}
                     </td>
                     <td className="px-4 py-3 text-xs font-bold text-slate-700">
-                      {event.user}
+                      {typeof event.user === "object"
+                        ? `${event.user?.firstName ?? ""} ${event.user?.lastName ?? ""}`.trim()
+                        : (event.user ?? event.adminName ?? "—")}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-600">
                       {event.action}
@@ -185,13 +236,13 @@ const AuditLogs = () => {
                       {event.resource}
                     </td>
                     <td className="px-4 py-3 text-xs font-medium text-slate-700">
-                      {event.company}
+                      {event.organization?.name || event.company || "—"}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-400 font-mono">
                       {event.ipAddress}
                     </td>
                     <td className="px-4 py-3">
-                      <SeverityBadge type={event.severity} />
+                      <SeverityBadge type={event.severity ?? "Info"} />
                     </td>
                   </tr>
                 ))
@@ -202,14 +253,19 @@ const AuditLogs = () => {
 
         <div className="p-4 border-t border-slate-50 flex flex-wrap justify-between items-center gap-3">
           <span className="text-xs text-slate-400">
-            Showing {events.length} of {data?.total || 0} events
+            Showing {events.length} of {data?.data?.total || data?.total || 0}{" "}
+            events
           </span>
           <div className="flex gap-1">
-            {[1, 2, 3, "...", 1561].map((p, i) => (
+            {Array.from(
+              { length: Math.min(totalPages, 3) },
+              (_, i) => i + 1,
+            ).map((p) => (
               <button
-                key={i}
+                key={p}
+                onClick={() => setCurrentPage(p)}
                 className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-medium ${
-                  p === 1
+                  p === currentPage
                     ? "bg-teal-600 text-white"
                     : "text-slate-400 hover:bg-slate-50"
                 }`}

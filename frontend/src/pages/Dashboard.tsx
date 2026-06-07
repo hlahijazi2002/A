@@ -27,6 +27,7 @@ import { api } from "../api/client";
 import { planClass } from "../utils/helpers";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useEffect, useState } from "react";
+import useFetch from "../hooks/useFetch";
 
 const statIcons = [
   <Building2 size={18} />,
@@ -48,11 +49,98 @@ const Dashboard = () => {
   const [recentCompanies, setRecentCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { data: summaryRes } = useFetch<any>("/analytics/summary", null);
+  const summary = summaryRes?.data || summaryRes;
+
+  const { data: activityRes } = useFetch<any>("/audit-logs?limit=3", null);
+  const activityData = Array.isArray(activityRes?.data?.data)
+    ? activityRes.data.data
+    : Array.isArray(activityRes?.data)
+      ? activityRes.data
+      : [];
+
+  const { data: orgsRes } = useFetch<any>("/orgs?limit=100", null);
+  const allOrgs = Array.isArray(orgsRes?.data?.data)
+    ? orgsRes.data.data
+    : Array.isArray(orgsRes?.data)
+      ? orgsRes.data
+      : [];
+
+  const starterCount = allOrgs.filter(
+    (o: any) => o.subscriptionPlan === "STARTER",
+  ).length;
+  const professionalCount = allOrgs.filter(
+    (o: any) => o.subscriptionPlan === "PROFESSIONAL",
+  ).length;
+  const enterpriseCount = allOrgs.filter(
+    (o: any) => o.subscriptionPlan === "ENTERPRISE",
+  ).length;
+  const total = allOrgs.length || 1;
+
+  const livePlanData = [
+    {
+      label: "Enterprise",
+      val: `${Math.round((enterpriseCount / total) * 100)}%`,
+      color: "bg-[#2D9A8F]",
+    },
+    {
+      label: "Professional",
+      val: `${Math.round((professionalCount / total) * 100)}%`,
+      color: "bg-[#4FD1C5]",
+    },
+    {
+      label: "Starter",
+      val: `${Math.round((starterCount / total) * 100)}%`,
+      color: "bg-[#B2E2D5]",
+    },
+  ];
+
+  const activeCount = allOrgs.filter(
+    (o: any) => o.subscriptionStatus === "ACTIVE",
+  ).length;
+  const trialCount = allOrgs.filter(
+    (o: any) => o.subscriptionStatus === "TRIAL",
+  ).length;
+  const suspendedCount = allOrgs.filter(
+    (o: any) => o.subscriptionStatus === "SUSPENDED",
+  ).length;
+  const cancelledCount = allOrgs.filter(
+    (o: any) => o.subscriptionStatus === "CANCELLED",
+  ).length;
+
+  const liveSubStatus = [
+    {
+      label: "Active",
+      count: activeCount,
+      color: "bg-emerald-500",
+      w: `${Math.round((activeCount / total) * 100)}%`,
+    },
+    {
+      label: "Trial",
+      count: trialCount,
+      color: "bg-amber-400",
+      w: `${Math.round((trialCount / total) * 100)}%`,
+    },
+    {
+      label: "Suspended",
+      count: suspendedCount,
+      color: "bg-rose-400",
+      w: `${Math.round((suspendedCount / total) * 100)}%`,
+    },
+    {
+      label: "Cancelled",
+      count: cancelledCount,
+      color: "bg-slate-200",
+      w: `${Math.round((cancelledCount / total) * 100)}%`,
+    },
+  ];
+
   useEffect(() => {
     api
       .get("/orgs?limit=8")
       .then((res) => {
-        const mapped = res.data.map((org: OrgFromAPI, i: number) => ({
+        const orgs = res.data?.data || res.data || [];
+        const mapped = orgs.map((org: OrgFromAPI, i: number) => ({
           id: org.id || `ORG-${i}`,
           name: org.name,
           ind: org.sector || "N/A",
@@ -74,9 +162,15 @@ const Dashboard = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  const liveValues = [
+    summary?.totalOrgs?.toString(),
+    summary?.activeUsers?.toString(),
+    null,
+    summary?.totalCo2eThisYear?.toString(),
+  ];
+
   return (
-    <div className=" bg-[#f8fafc] space-y-6">
-      {/*  Header  */}
+    <div className="bg-[#f8fafc] space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
           <h1 className="text-xl font-black text-slate-900 tracking-tight">
@@ -88,7 +182,7 @@ const Dashboard = () => {
         </div>
         <div className="flex gap-2">
           <button className="flex items-center gap-2 border border-slate-200 px-4 py-2 rounded-lg text-[11px] font-bold text-slate-600">
-            <Calendar size={14} /> Jan 2024 - Dec 2024
+            <Calendar size={14} /> Jan 2026 - Dec 2026
           </button>
           <Link
             to="/addCompany"
@@ -99,11 +193,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/*  KPI Cards  */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {dashboardStats.map((s, i) => (
           <Link
-            key={i}
+            key={s.label}
             to={s.path}
             className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm block"
           >
@@ -112,7 +205,9 @@ const Dashboard = () => {
             </p>
             <p className="text-[9px] text-slate-400 mt-0.5 mb-3">{s.sub}</p>
             <div className="flex justify-between items-center">
-              <p className="text-2xl font-black text-slate-900">{s.val}</p>
+              <p className="text-2xl font-black text-slate-900">
+                {liveValues[i] || s.val}
+              </p>
               <div className={`p-2.5 ${s.bg} rounded-xl text-slate-600`}>
                 {statIcons[i]}
               </div>
@@ -123,15 +218,17 @@ const Dashboard = () => {
               ) : (
                 <ArrowDownRight size={12} />
               )}
-              {s.trend}
+              {i === 0 && summary?.newOrgs30d
+                ? `+${summary.newOrgs30d} this month`
+                : i === 1 && summary?.newUsers30d
+                  ? `+${summary.newUsers30d} this month`
+                  : s.trend}
             </p>
           </Link>
         ))}
       </div>
 
-      {/*  Recent Companies + Side cards  */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        {/* Table */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden self-start h-fit">
           <div className="flex justify-between items-center px-5 py-4 border-b border-slate-50">
             <h3 className="font-bold text-slate-900 text-sm">
@@ -165,9 +262,9 @@ const Dashboard = () => {
                     </td>
                   </tr>
                 ) : (
-                  recentCompanies.map((row, i) => (
+                  recentCompanies.map((row) => (
                     <tr
-                      key={i}
+                      key={row.id}
                       className="hover:bg-slate-50/30 transition-colors cursor-pointer relative"
                     >
                       <td className="px-4 py-3">
@@ -222,15 +319,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Side */}
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
             <h3 className="font-bold text-slate-900 text-sm mb-4">
               Platform Health
             </h3>
             <div className="space-y-4">
-              {platformHealth.map((h, i) => (
-                <div key={i}>
+              {platformHealth.map((h) => (
+                <div key={h.label}>
                   <div className="flex justify-between text-[11px] mb-1.5">
                     <span className="text-slate-700">{h.label}</span>
                     <span className="font-bold text-slate-800">{h.val}</span>
@@ -251,37 +347,46 @@ const Dashboard = () => {
               Recent Activity
             </h3>
             <div className="space-y-4">
-              {recentActivity.map((item, i) => (
-                <div
-                  key={i}
-                  className="flex gap-3 pb-3 border-b border-slate-100 last:border-0 last:pb-0"
-                >
+              {(activityData.length > 0 ? activityData : recentActivity).map(
+                (item: any, i: number) => (
                   <div
-                    className={`w-8 h-8 ${item.bg} rounded-full flex items-center justify-center shrink-0`}
+                    key={i}
+                    className="flex gap-3 pb-3 border-b border-slate-100 last:border-0 last:pb-0"
                   >
-                    <Clock size={13} className={item.color} />
+                    <div
+                      className={`w-8 h-8 ${item.bg || "bg-teal-50"} rounded-full flex items-center justify-center shrink-0`}
+                    >
+                      <Clock
+                        size={13}
+                        className={item.color || "text-teal-500"}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-bold text-slate-800">
+                        {item.t || item.action || "—"}
+                      </p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        {item.s ||
+                          (item.user
+                            ? `${item.user?.firstName || ""} ${item.user?.lastName || ""}`.trim()
+                            : "—")}
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        {item.time ||
+                          (item.createdAt
+                            ? new Date(item.createdAt).toLocaleString()
+                            : "—")}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[12px] font-bold text-slate-800">
-                      {item.t}
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      {item.s}
-                    </p>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {item.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/*  Bottom row  */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Donut */}
         <Link
           to="/companies"
           className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm block"
@@ -331,8 +436,11 @@ const Dashboard = () => {
               />
             </svg>
             <div className="space-y-3 flex-1">
-              {companiesByPlan.map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
+              {livePlanData.map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 ${item.color} rounded-sm`} />
                     <span className="text-xs font-semibold text-slate-600">
@@ -348,7 +456,6 @@ const Dashboard = () => {
           </div>
         </Link>
 
-        {/* Subscription Status */}
         <Link
           to="/companies"
           className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm block"
@@ -357,9 +464,9 @@ const Dashboard = () => {
             Subscription Status
           </h3>
           <div className="space-y-2">
-            {subscriptionStatus.map((s, i) => (
+            {liveSubStatus.map((s) => (
               <div
-                key={i}
+                key={s.label}
                 className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-0"
               >
                 <span className="text-xs font-semibold text-slate-600 w-20 shrink-0">
@@ -379,7 +486,6 @@ const Dashboard = () => {
           </div>
         </Link>
 
-        {/* Quick Actions */}
         <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
           <h3 className="font-bold text-slate-900 text-sm mb-3">
             Quick Actions
@@ -406,9 +512,9 @@ const Dashboard = () => {
                 icon: <Leaf size={16} />,
                 path: "/analytics",
               },
-            ].map((a, i) => (
+            ].map((a) => (
               <Link
-                key={i}
+                key={a.label}
                 to={a.path}
                 className="group flex items-center justify-between px-2 py-2 rounded-xl hover:bg-slate-50 transition-all"
               >

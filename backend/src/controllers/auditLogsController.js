@@ -1,42 +1,22 @@
-const mockData = require("../config/mockData");
-const MOCK_MODE = process.env.MOCK_MODE === "true";
+const carbonApi = require("../config/carbonApi");
 
-//  Get Audit Logs
 const getAuditLogs = async (req, res) => {
   try {
-    if (MOCK_MODE) {
-      const { orgId, from, to, page = 1, limit = 20 } = req.query;
+    const { orgId, userId, action, from, to, page = 1, limit = 20 } = req.query;
 
-      let data = [...mockData.auditLogs];
+    const params = { page, limit };
+    if (orgId) params.orgId = orgId;
+    if (userId) params.userId = userId;
+    if (action) params.action = action;
+    if (from) params.from = from;
+    if (to) params.to = to;
 
-      if (orgId) {
-        data = data.filter((l) => l.organizationId === orgId);
-      }
-      if (from) {
-        data = data.filter((l) => new Date(l.timestamp) >= new Date(from));
-      }
-      if (to) {
-        data = data.filter((l) => new Date(l.timestamp) <= new Date(to));
-      }
-
-      // newest first
-      data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      return res.json({
-        data,
-        total: data.length,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(data.length / limit),
-      });
-    }
-    // Real API — coming soon
-    return res
-      .status(501)
-      .json({ error: "Not implemented. Waiting for Carbon App API." });
+    const response = await carbonApi.get("/audit-logs", { params });
+    return res.json(response.data);
   } catch (err) {
-    console.error("getAuditLogs error:", err);
-    res.status(500).json({ error: "Server error." });
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
   }
 };
 

@@ -1,50 +1,34 @@
 import { useState } from "react";
 import { Download, Plus, Search, Check, AlertTriangle } from "lucide-react";
-import {
-  subscriptionPlans,
-  type PlanName,
-  type SubscriptionPlan,
-  type SubscriptionRecord,
-  type SubscriptionStatus,
-} from "../../data/data";
+import { subscriptionPlans, type SubscriptionPlan } from "../../data/data";
 import useFetch from "../hooks/useFetch";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { api } from "../api/client";
 
-const planBadgeStyles: Record<PlanName, string> = {
-  Enterprise:
+const PLANS = ["STARTER", "PROFESSIONAL", "ENTERPRISE"];
+
+const planBadgeStyles: Record<string, string> = {
+  ENTERPRISE:
     "bg-linear-to-r from-[#0a1a16] via-[#142e29] to-[#1a5546] text-amber-400 font-black",
-  Professional: "bg-teal-50 text-teal-600 font-bold",
-  Pro: "bg-teal-50 text-teal-600 font-bold",
-  Starter: "bg-slate-100 text-slate-500 font-bold",
+  PROFESSIONAL: "bg-teal-50 text-teal-600 font-bold",
+  STARTER: "bg-slate-100 text-slate-500 font-bold",
 };
 
-const statusStyles: Record<
-  SubscriptionStatus,
-  { dot: string; badge: string; dateColor: string }
-> = {
-  Active: {
-    dot: "bg-emerald-500",
-    badge: "bg-emerald-50 text-emerald-600",
-    dateColor: "text-slate-700",
-  },
-  Expiring: {
-    dot: "bg-amber-400",
-    badge: "bg-amber-50 text-amber-600",
-    dateColor: "text-rose-500",
-  },
-  "Renewal Due": {
-    dot: "bg-orange-400",
-    badge: "bg-orange-50 text-orange-600",
-    dateColor: "text-rose-500",
-  },
-  Suspended: {
-    dot: "bg-rose-500",
-    badge: "bg-rose-50 text-rose-600",
-    dateColor: "text-rose-500",
-  },
+const statusStyles: Record<string, { dot: string; badge: string }> = {
+  ACTIVE: { dot: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-600" },
+  TRIAL: { dot: "bg-amber-400", badge: "bg-amber-50 text-amber-600" },
+  SUSPENDED: { dot: "bg-rose-500", badge: "bg-rose-50 text-rose-600" },
+  CANCELLED: { dot: "bg-slate-400", badge: "bg-slate-50 text-slate-500" },
+  EXPIRED: { dot: "bg-rose-300", badge: "bg-rose-50 text-rose-400" },
 };
 
-const PlanCard = ({ plan }: { plan: SubscriptionPlan }) => (
+const PlanCard = ({
+  plan,
+  count,
+}: {
+  plan: SubscriptionPlan;
+  count?: number;
+}) => (
   <div
     className={`relative bg-white rounded-2xl border shadow-sm flex flex-col p-6 transition-all ${
       plan.highlight
@@ -88,74 +72,139 @@ const PlanCard = ({ plan }: { plan: SubscriptionPlan }) => (
     <p className="text-[11px] text-slate-400 mb-4">
       Active subscribers:{" "}
       <span className="font-black text-slate-700">
-        {plan.activeSubscribers}
+        {count ?? plan.activeSubscribers}
       </span>
     </p>
-    <button className="w-full py-2 border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-all">
+    <button
+      disabled
+      className="w-full py-2 border border-slate-200 rounded-lg text-[12px] font-bold text-slate-300 cursor-not-allowed"
+    >
       Edit Plan
     </button>
   </div>
 );
 
-const RecordRow = ({ record }: { record: SubscriptionRecord }) => {
-  const st = statusStyles[record.status];
-  return (
-    <tr className="hover:bg-slate-50/40 transition-colors">
-      <td className="px-5 py-4 text-[12px] font-bold text-slate-800">
-        {record.company}
-      </td>
-      <td className="px-5 py-4">
-        <span
-          className={`text-[10px] px-2.5 py-1 rounded-md uppercase tracking-tight ${planBadgeStyles[record.plan] ?? planBadgeStyles.Starter}`}
-        >
-          {record.plan}
-        </span>
-      </td>
-      <td className="px-5 py-4 text-[11px] text-slate-500">
-        {record.startDate}
-      </td>
-      <td className={`px-5 py-4 text-[11px] font-bold ${st.dateColor}`}>
-        {record.renewalDate}
-      </td>
-      <td className="px-5 py-4 text-[12px] font-bold text-slate-700">
-        {record.amount}
-      </td>
-      <td className="px-5 py-4">
-        <span
-          className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full ${st.badge}`}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
-          {record.status}
-        </span>
-      </td>
-      <td className="px-5 py-4">
-        <div className="flex gap-2">
-          <button className="px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-            Renew
-          </button>
-          <button className="px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-            Change Plan
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-};
-
 const SubscriptionManagement = () => {
   const [search, setSearch] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [localOrgs, setLocalOrgs] = useState<any[] | null>(null);
+  const [planModal, setPlanModal] = useState<{
+    orgId: string;
+    currentPlan: string;
+  } | null>(null);
+  const [showExpiring, setShowExpiring] = useState(false);
 
-  const { data, loading } = useFetch<{ data: SubscriptionRecord[] }>(
-    "/subscriptions?limit=20",
-    { data: [] },
-  );
+  const { data, loading } = useFetch<any>("/orgs?limit=100", { data: [] });
 
-  const records = (data?.data || []).filter((r) =>
-    r.company?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const rawOrgs =
+    localOrgs ??
+    (Array.isArray(data?.data?.data)
+      ? data.data.data
+      : Array.isArray(data?.data)
+        ? data.data
+        : []);
+
+  const starterCount = rawOrgs.filter(
+    (o: any) => o.subscriptionPlan === "STARTER",
+  ).length;
+  const professionalCount = rawOrgs.filter(
+    (o: any) => o.subscriptionPlan === "PROFESSIONAL",
+  ).length;
+  const enterpriseCount = rawOrgs.filter(
+    (o: any) => o.subscriptionPlan === "ENTERPRISE",
+  ).length;
+
+  const planCounts: Record<string, number> = {
+    Starter: starterCount,
+    Professional: professionalCount,
+    Enterprise: enterpriseCount,
+  };
+
+  const records = rawOrgs.filter((o: any) => {
+    const matchSearch = o.name?.toLowerCase().includes(search.toLowerCase());
+    const matchExpiring = !showExpiring || o.subscriptionStatus === "TRIAL";
+    return matchSearch && matchExpiring;
+  });
+
+  const handleChangePlan = async (orgId: string, newPlan: string) => {
+    setActionLoading(orgId);
+    try {
+      await api.patch(`/orgs/${orgId}/subscription`, {
+        subscriptionPlan: newPlan,
+      });
+      setLocalOrgs(
+        rawOrgs.map((o: any) =>
+          o.id === orgId ? { ...o, subscriptionPlan: newPlan } : o,
+        ),
+      );
+      setPlanModal(null);
+    } catch {
+      alert("Failed to update subscription. Please try again.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleStatus = async (org: any) => {
+    const newStatus =
+      org.subscriptionStatus === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+    if (
+      !confirm(
+        `Are you sure you want to set this subscription to ${newStatus}?`,
+      )
+    )
+      return;
+
+    setActionLoading(org.id);
+    try {
+      await api.patch(`/orgs/${org.id}/subscription`, {
+        subscriptionStatus: newStatus,
+      });
+      setLocalOrgs(
+        rawOrgs.map((o: any) =>
+          o.id === org.id ? { ...o, subscriptionStatus: newStatus } : o,
+        ),
+      );
+    } catch {
+      alert("Failed to update subscription status. Please try again.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50/30 space-y-6">
+      {/* Plan Modal */}
+      {planModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-6 w-80 shadow-xl">
+            <h3 className="font-bold text-slate-800 mb-4">Change Plan</h3>
+            <div className="space-y-2">
+              {PLANS.map((plan) => (
+                <button
+                  key={plan}
+                  onClick={() => handleChangePlan(planModal.orgId, plan)}
+                  disabled={actionLoading === planModal.orgId}
+                  className={`w-full text-left px-4 py-2.5 rounded-lg text-[12px] font-bold transition-colors ${
+                    plan === planModal.currentPlan
+                      ? "bg-teal-50 text-teal-600 border border-teal-200"
+                      : "hover:bg-slate-50 text-slate-700"
+                  }`}
+                >
+                  {plan}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setPlanModal(null)}
+              className="mt-4 w-full py-2 border border-slate-200 rounded-lg text-[12px] font-bold text-slate-500 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap justify-between items-start gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -165,19 +214,11 @@ const SubscriptionManagement = () => {
             Manage plans, billing cycles, and renewals
           </p>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-            <Download size={14} /> Billing History
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-[12px] font-bold shadow-sm transition-all">
-            <Plus size={14} /> Create Plan
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {subscriptionPlans.map((plan) => (
-          <PlanCard key={plan.id} plan={plan} />
+          <PlanCard key={plan.id} plan={plan} count={planCounts[plan.name]} />
         ))}
       </div>
 
@@ -200,7 +241,14 @@ const SubscriptionManagement = () => {
                 className="pl-9 pr-4 py-2 bg-slate-50 rounded-lg text-xs w-48 focus:ring-1 focus:ring-teal-500 outline-none"
               />
             </div>
-            <button className="flex items-center gap-2 px-3 py-2 border border-amber-200 bg-amber-50 rounded-lg text-[11px] font-bold text-amber-600 hover:bg-amber-100 transition-colors">
+            <button
+              onClick={() => setShowExpiring(!showExpiring)}
+              className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-[11px] font-bold transition-colors ${
+                showExpiring
+                  ? "border-amber-400 bg-amber-100 text-amber-700"
+                  : "border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-100"
+              }`}
+            >
               <AlertTriangle size={13} /> Expiring Soon
             </button>
           </div>
@@ -213,10 +261,9 @@ const SubscriptionManagement = () => {
                 {[
                   "Company",
                   "Plan",
-                  "Start Date",
-                  "Renewal Date",
-                  "Amount",
                   "Status",
+                  "Trial Ends",
+                  "Employees",
                   "Actions",
                 ].map((h) => (
                   <th key={h} className="px-5 py-4">
@@ -228,12 +275,90 @@ const SubscriptionManagement = () => {
             <tbody className="divide-y divide-slate-50">
               {loading ? (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={6}>
                     <LoadingSpinner />
                   </td>
                 </tr>
+              ) : records.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-5 py-12 text-center text-slate-400 text-sm"
+                  >
+                    No records found
+                  </td>
+                </tr>
               ) : (
-                records.map((r) => <RecordRow key={r.id} record={r} />)
+                records.map((org: any) => {
+                  const st =
+                    statusStyles[org.subscriptionStatus] ?? statusStyles.TRIAL;
+                  return (
+                    <tr
+                      key={org.id}
+                      className="hover:bg-slate-50/40 transition-colors"
+                    >
+                      <td className="px-5 py-4 text-[12px] font-bold text-slate-800">
+                        {org.name}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`text-[10px] px-2.5 py-1 rounded-md uppercase tracking-tight ${planBadgeStyles[org.subscriptionPlan] ?? planBadgeStyles.STARTER}`}
+                        >
+                          {org.subscriptionPlan}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full ${st.badge}`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${st.dot}`}
+                          />
+                          {org.subscriptionStatus}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-[11px] text-slate-400">
+                        {org.trialEndsAt
+                          ? new Date(org.trialEndsAt).toLocaleDateString()
+                          : "—"}
+                      </td>
+                      <td className="px-5 py-4 text-[11px] text-slate-500">
+                        {org.employeeCount || "—"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() =>
+                              setPlanModal({
+                                orgId: org.id,
+                                currentPlan: org.subscriptionPlan,
+                              })
+                            }
+                            disabled={actionLoading === org.id}
+                            className="px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                          >
+                            Change Plan
+                          </button>
+                          <button
+                            onClick={() => handleToggleStatus(org)}
+                            disabled={actionLoading === org.id}
+                            className={`px-3 py-1.5 border rounded-lg text-[11px] font-bold transition-colors disabled:opacity-50 ${
+                              org.subscriptionStatus === "ACTIVE"
+                                ? "border-rose-200 text-rose-600 hover:bg-rose-50"
+                                : "border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                            }`}
+                          >
+                            {actionLoading === org.id
+                              ? "..."
+                              : org.subscriptionStatus === "ACTIVE"
+                                ? "Suspend"
+                                : "Activate"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

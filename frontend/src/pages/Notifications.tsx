@@ -80,7 +80,11 @@ const Notifications = () => {
     { data: [] },
   );
 
-  const items = data?.data || [];
+  const items = Array.isArray(data?.data?.data)
+    ? data.data.data
+    : Array.isArray(data?.data)
+      ? data.data
+      : [];
   const unreadCount = items.filter((n) => n.unread).length;
   const filtered =
     activeTab === "All" ? items : items.filter((n) => n.category === activeTab);
