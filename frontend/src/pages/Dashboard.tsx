@@ -76,6 +76,8 @@ const Dashboard = () => {
     (o: any) => o.subscriptionPlan === "ENTERPRISE",
   ).length;
   const total = allOrgs.length || 1;
+  const MRR =
+    starterCount * 3500 + professionalCount * 4200 + enterpriseCount * 5000;
 
   const livePlanData = [
     {
@@ -165,7 +167,7 @@ const Dashboard = () => {
   const liveValues = [
     summary?.totalOrgs?.toString(),
     summary?.activeUsers?.toString(),
-    null,
+    MRR > 0 ? `SAR ${MRR.toLocaleString()}` : null,
     summary?.totalCo2eThisYear?.toString(),
   ];
 
@@ -222,7 +224,11 @@ const Dashboard = () => {
                 ? `+${summary.newOrgs30d} this month`
                 : i === 1 && summary?.newUsers30d
                   ? `+${summary.newUsers30d} this month`
-                  : s.trend}
+                  : i === 2 && summary?.newOrgs30d
+                    ? `+${summary.newOrgs30d * 3500} SAR this month`
+                    : i === 3
+                      ? ""
+                      : s.trend}
             </p>
           </Link>
         ))}
