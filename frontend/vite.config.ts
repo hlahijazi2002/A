@@ -3,9 +3,6 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  build: {
-    typescript: false,
-  },
   server: {
     watch: {
       usePolling: true,
