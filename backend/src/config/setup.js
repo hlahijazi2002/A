@@ -58,7 +58,11 @@ const createTables = async () => {
     console.log("✅ All tables created successfully");
 
     // Insert default admin user
-    const password = process.env.SEED_ADMIN_PASSWORD || "admin246";
+    const password = process.env.SEED_ADMIN_PASSWORD;
+if (!password) {
+  console.error("❌ SEED_ADMIN_PASSWORD environment variable is not set");
+  process.exit(1);
+}
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
       `INSERT INTO admin_users (email, password, name, role, is_active)
