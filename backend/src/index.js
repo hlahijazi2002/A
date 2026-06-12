@@ -40,8 +40,10 @@ app.use("/auth/login", loginLimiter);
 
 // Middleware
 app.use(cors({ 
-  origin: process.env.ADMIN_FRONTEND_URL || "https://a-z6hs.vercel.app",
-  credentials: true 
+  origin: ["https://a-z6hs.vercel.app", "http://localhost:5173", "http://localhost:3000"],
+  credentials: true,
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.use(express.json());
 
