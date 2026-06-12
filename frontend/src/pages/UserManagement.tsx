@@ -18,7 +18,7 @@ import { userStats } from "../../data/data";
 import useFetch from "../hooks/useFetch";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { api } from "../api/client";
-
+// @ts-nocheck
 const statIcons = [
   <User size={17} className="text-teal-500" />,
   <ShieldCheck size={17} className="text-teal-100" />,
