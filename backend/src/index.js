@@ -39,7 +39,10 @@ app.use(generalLimiter);
 app.use("/auth/login", loginLimiter);
 
 // Middleware
-app.use(cors({ origin: process.env.ADMIN_FRONTEND_URL }));
+app.use(cors({ 
+  origin: process.env.ADMIN_FRONTEND_URL || "https://a-z6hs.vercel.app",
+  credentials: true 
+}));
 app.use(express.json());
 
 // Routes
