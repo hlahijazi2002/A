@@ -1,9 +1,9 @@
+const bcrypt = require("bcryptjs");
 const pool = require("./db");
 
 const createTables = async () => {
   try {
     await pool.query(`
-
       -- Admin Users
       CREATE TABLE IF NOT EXISTS admin_users (
         id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -15,7 +15,6 @@ const createTables = async () => {
         created_at  TIMESTAMP DEFAULT NOW(),
         updated_at  TIMESTAMP DEFAULT NOW()
       );
-
       -- Admin Sessions
       CREATE TABLE IF NOT EXISTS admin_sessions (
         id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -25,7 +24,6 @@ const createTables = async () => {
         created_at    TIMESTAMP DEFAULT NOW(),
         updated_at    TIMESTAMP DEFAULT NOW()
       );
-
       -- Partner Organizations
       CREATE TABLE IF NOT EXISTS partner_organizations (
         id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -36,7 +34,6 @@ const createTables = async () => {
         created_at  TIMESTAMP DEFAULT NOW(),
         updated_at  TIMESTAMP DEFAULT NOW()
       );
-
       -- Notification Templates
       CREATE TABLE IF NOT EXISTS notification_templates (
         id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -46,7 +43,6 @@ const createTables = async () => {
         created_at  TIMESTAMP DEFAULT NOW(),
         updated_at  TIMESTAMP DEFAULT NOW()
       );
-
       -- Admin Activity Log
       CREATE TABLE IF NOT EXISTS admin_activity_log (
         id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -58,10 +54,20 @@ const createTables = async () => {
         created_at  TIMESTAMP DEFAULT NOW(),
         updated_at  TIMESTAMP DEFAULT NOW()
       );
-
     `);
-
     console.log("✅ All tables created successfully");
+
+    // Insert default admin user
+    const password = process.env.SEED_ADMIN_PASSWORD || "admin246";
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.query(
+      `INSERT INTO admin_users (email, password, name, role, is_active)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (email) DO NOTHING;`,
+      ["admin@urimpact.com", hashedPassword, "Admin User", "SUPER_ADMIN", true]
+    );
+    console.log("✅ Default admin user created");
+
     process.exit(0);
   } catch (err) {
     console.error("❌ Error creating tables:", err);
