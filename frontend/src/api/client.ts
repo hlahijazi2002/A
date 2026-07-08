@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const getToken = () => localStorage.getItem("token");
@@ -39,4 +40,17 @@ export const api = {
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     return res.json();
   },
+
+  createAdminCompany: async (body: unknown) => {
+    return api.post("/orgs", body);
+  },
 };
+
+export async function createAdminCompany(payload: Record<string, unknown>) {
+  try {
+    const json = await api.post("/orgs", payload);
+    return json?.data ?? json;
+  } catch (err: any) {
+    throw new Error(err.message || "Create company failed", { cause: err });
+  }
+}

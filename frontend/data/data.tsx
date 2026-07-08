@@ -1213,15 +1213,23 @@ export const industryOptions: string[] = [
   "Finance",
 ];
 
-export const countryOptions: string[] = [
+export const countryOptions = [
+  "Saudi Arabia",
+  "Palestine",
+  "UAE",
   "India",
   "United States",
   "United Kingdom",
   "Germany",
   "Singapore",
   "Australia",
-  "UAE",
   "Japan",
+  "Egypt",
+  "Jordan",
+  "Qatar",
+  "Kuwait",
+  "Bahrain",
+  "Oman",
 ];
 
 export const employeeOptions: string[] = [

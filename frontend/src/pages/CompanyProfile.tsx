@@ -32,6 +32,10 @@ const CompanyProfile = () => {
   const [modules, setModules] = useState<CompanyProfileModule[]>(
     companyProfile.modules,
   );
+  const [users, setUsers] = useState<any[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -86,7 +90,11 @@ const CompanyProfile = () => {
                   }))
               : companyProfile.modules,
             scopeSummary: [],
+            totalCo2e: org.totalCo2e ?? null,
+            scope1Inventory: org.scope1Inventory || null,
+            scope2Inventory: org.scope2Inventory || null,
           };
+
           setOrgData(mapped);
           setModules(mapped.modules);
         })
@@ -95,6 +103,33 @@ const CompanyProfile = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (activeTab === "Users" && id) {
+      setUsersLoading(true);
+      api
+        .get(`/users?orgId=${id}`)
+        .then((res) => {
+          const list = res.data?.data || res.data || res.users || res;
+          setUsers(Array.isArray(list) ? list : []);
+        })
+        .catch(() => setUsers([]))
+        .finally(() => setUsersLoading(false));
+    }
+  }, [activeTab, id]);
+
+  useEffect(() => {
+    if (activeTab === "Activity Log" && id) {
+      setAuditLoading(true);
+      api
+        .get(`/audit-logs?orgId=${id}`)
+        .then((res) => {
+          const list = res.data?.data || res.data || res;
+          setAuditLogs(Array.isArray(list) ? list : []);
+        })
+        .catch(() => setAuditLogs([]))
+        .finally(() => setAuditLoading(false));
+    }
+  }, [activeTab, id]);
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -348,9 +383,171 @@ const CompanyProfile = () => {
           </div>
         )}
 
-        {activeTab !== "Overview" && (
-          <div className="p-16 text-center">
-            <p className="text-slate-400 text-sm">{activeTab} content</p>
+        {activeTab === "Users" && (
+          <div className="p-5">
+            {usersLoading ? (
+              <p className="text-slate-400 text-sm text-center py-10">
+                Loading...
+              </p>
+            ) : users.length === 0 ? (
+              <p className="text-slate-400 text-sm text-center py-10">
+                No users found.
+              </p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {users.map((u) => (
+                  <div
+                    key={u.id}
+                    className="flex items-center justify-between py-3"
+                  >
+                    <div>
+                      <p className="text-[12px] font-bold text-slate-800">
+                        {u.firstName} {u.lastName}
+                      </p>
+                      <p className="text-[11px] text-slate-400">{u.email}</p>
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-600">
+                      {u.role}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "Subscription" && (
+          <div className="p-5 max-w-md">
+            <div className="divide-y divide-slate-100">
+              {[
+                { label: "Plan", value: p.plan || p.subscriptionPlan || "—" },
+                { label: "Status", value: p.subscriptionStatus || "—" },
+                { label: "Billing Cycle", value: "Monthly" },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between py-3">
+                  <span className="text-[12px] text-slate-400">{label}</span>
+                  <span className="text-[12px] font-bold text-slate-800">
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "Activity Log" && (
+          <div className="p-5">
+            {auditLoading ? (
+              <p className="text-slate-400 text-sm text-center py-10">
+                Loading...
+              </p>
+            ) : auditLogs.length === 0 ? (
+              <p className="text-slate-400 text-sm text-center py-10">
+                No activity found.
+              </p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {auditLogs.map((log, i) => (
+                  <div
+                    key={log.id || i}
+                    className="flex items-start justify-between py-3"
+                  >
+                    <div>
+                      <p className="text-[12px] font-bold text-slate-800">
+                        {log.action}
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        {log.userEmail || log.userId}
+                      </p>
+                    </div>
+                    <span className="text-[11px] text-slate-400">
+                      {log.createdAt
+                        ? new Date(log.createdAt).toLocaleString()
+                        : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "Emissions" && (
+          <div className="p-5 space-y-5">
+            <div className="bg-slate-50/50 rounded-xl border border-slate-100 p-5 text-center">
+              <p className="text-3xl font-black text-slate-900">
+                {p.totalCo2e != null ? p.totalCo2e : "—"}
+              </p>
+              <p className="text-[11px] text-slate-400 mt-1 uppercase tracking-wide">
+                Total tCO₂e
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div className="bg-slate-50/50 rounded-xl border border-slate-100 p-5">
+                <h3 className="text-[13px] font-bold text-slate-800 mb-3">
+                  Scope 1 (Direct Emissions)
+                </h3>
+                {p.scope1Inventory ? (
+                  <div className="space-y-2 text-[12px] text-slate-600">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Vehicles</span>
+                      <span className="font-bold">
+                        {p.scope1Inventory.vehicles?.length ?? 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">
+                        Refrigerant Equipment
+                      </span>
+                      <span className="font-bold">
+                        {p.scope1Inventory.refrigerantRows?.length ?? 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Process Emissions</span>
+                      <span className="font-bold">
+                        {p.scope1Inventory.processEmissionRows?.length ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[12px] text-slate-400">
+                    No data submitted.
+                  </p>
+                )}
+              </div>
+
+              <div className="bg-slate-50/50 rounded-xl border border-slate-100 p-5">
+                <h3 className="text-[13px] font-bold text-slate-800 mb-3">
+                  Scope 2 (Indirect Emissions)
+                </h3>
+                {p.scope2Inventory ? (
+                  <div className="space-y-2 text-[12px] text-slate-600">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Facilities</span>
+                      <span className="font-bold">
+                        {p.scope2Inventory.totalFacilityCount ?? 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">
+                        Purchased Electricity
+                      </span>
+                      <span className="font-bold">
+                        {p.scope2Inventory.purchasedElectricity?.enabled
+                          ? "Yes"
+                          : "No"}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[12px] text-slate-400">
+                    No data submitted.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

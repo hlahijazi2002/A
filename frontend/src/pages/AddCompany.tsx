@@ -10,6 +10,7 @@ import type { ModuleOption } from "../../data/data";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Toggle from "../components/Toggle";
+import { createAdminCompany } from "../api/client";
 
 const Label = ({ text, required }: { text: string; required?: boolean }) => (
   <label className="block text-[12px] font-bold text-slate-700 mb-1.5">
@@ -152,6 +153,7 @@ interface FormState {
   country: string;
   state: string;
   city: string;
+  password: string;
   website: string;
   description: string;
   regNo: string;
@@ -176,6 +178,7 @@ const AddCompany = () => {
     country: countryOptions[0],
     state: "",
     city: "",
+    password: "",
     website: "",
     description: "",
     plan: "Starter",
@@ -197,6 +200,41 @@ const AddCompany = () => {
     setModules((p) =>
       p.map((m) => (m.id === id ? { ...m, enabled: !m.enabled } : m)),
     );
+
+  const handleSubmit = async () => {
+    if (!form.companyName) {
+      alert("Company name is required.");
+      return;
+    }
+    if (!form.firstName || !form.lastName || !form.workEmail) {
+      alert("Admin user first name, last name and email are required.");
+      return;
+    }
+    try {
+      await createAdminCompany({
+        name: form.companyName,
+        subscriptionPlan: (form.plan || "STARTER").toUpperCase(),
+        pocEmail: form.workEmail || undefined,
+        legalName: form.companyName || undefined,
+        commercialRegistrationNumber: form.regNo || undefined,
+        headquarterAddress:
+          [form.city, form.state, form.country].filter(Boolean).join(", ") ||
+          undefined,
+        employeeCount: undefined,
+        revenueAmount: form.revenue || undefined,
+        pocFullName: `${form.firstName} ${form.lastName}`.trim() || undefined,
+        adminUser: {
+          email: form.workEmail,
+          password: form.password,
+          firstName: form.firstName,
+          lastName: form.lastName,
+        },
+      });
+      navigate("/companies");
+    } catch (err: any) {
+      alert(err.message || "Failed to create company.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50/30 space-y-6">
@@ -430,6 +468,15 @@ const AddCompany = () => {
               </div>
             </div>
             <div>
+              <Label text="Password" required />
+              <Input
+                placeholder="Temporary password"
+                type="password"
+                value={form.password}
+                onChange={set("password")}
+              />
+            </div>
+            <div>
               <Label text="Work Email" required />
               <Input
                 placeholder="admin@company.com"
@@ -490,6 +537,9 @@ const AddCompany = () => {
               { label: "Country", value: form.country },
               { label: "Admin Email", value: form.workEmail || "—" },
               { label: "Employees", value: form.employees },
+              { label: "Admin First Name", value: form.firstName || "—" },
+              { label: "Admin Last Name", value: form.lastName || "—" },
+              { label: "Admin Email", value: form.workEmail || "—" },
               { label: "Plan", value: form.plan },
             ].map(({ label, value }) => (
               <div
@@ -527,8 +577,8 @@ const AddCompany = () => {
           </button>
         ) : (
           <button
-            onClick={() => navigate("/companies")}
-            className="flex items-center gap-2 px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-[12px] font-bold shadow-sm transition-all"
+            onClick={handleSubmit}
+            className="flex items-center gap-2 px-6 py-2.5 bg-teal-600..."
           >
             Submit <ArrowRight size={14} />
           </button>

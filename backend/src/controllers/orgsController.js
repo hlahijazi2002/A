@@ -44,6 +44,16 @@ const getOrgById = async (req, res) => {
   }
 };
 
+const createOrg = async (req, res) => {
+  try {
+    const response = await carbonApi.post("/organisations", req.body);
+    return res.json(response.data);
+  } catch (err) {
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || "Server error.";
+    return res.status(status).json({ error: message });
+  }
+};
 const updateOrgStatus = async (req, res) => {
   try {
     const { isActive, reason } = req.body;
@@ -108,5 +118,6 @@ module.exports = {
   getOrgs,
   getOrgById,
   updateOrgStatus,
+  createOrg,
   updateOrgSubscription,
 };
