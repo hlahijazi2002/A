@@ -170,6 +170,9 @@ interface FormState {
 
 const AddCompany = () => {
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const decoded = token ? JSON.parse(atob(token.split(".")[1])) : null;
+  const isSuperAdmin = decoded?.role === "SUPER_ADMIN";
   const [currentStep, setCurrentStep] = useState(1);
   const [modules, setModules] = useState<ModuleOption[]>(defaultModules);
   const [form, setForm] = useState<FormState>({
@@ -192,6 +195,8 @@ const AddCompany = () => {
     phone: "",
     designation: "",
   });
+  const [emailError, setEmailError] = useState("");
+  const [formErrors, setFormErrors] = useState<string[]>([]);
 
   const set = (key: keyof FormState) => (v: string) =>
     setForm((p) => ({ ...p, [key]: v }));
@@ -202,39 +207,88 @@ const AddCompany = () => {
     );
 
   const handleSubmit = async () => {
-    if (!form.companyName) {
-      alert("Company name is required.");
+    const errors: string[] = [];
+
+    if (!form.companyName || form.companyName.trim().length < 2) {
+      errors.push("Company name must be at least 2 characters.");
+    }
+    if (form.companyName.trim().length > 200) {
+      errors.push("Company name must be less than 200 characters.");
+    }
+    if (!form.firstName || !form.lastName) {
+      errors.push("Admin first name and last name are required.");
+    }
+    if (!form.workEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.workEmail)) {
+      errors.push("A valid admin email is required.");
+    }
+    if (!form.password || form.password.length < 8) {
+      errors.push("Password must be at least 8 characters.");
+    }
+
+    if (errors.length > 0) {
+      setFormErrors(errors);
       return;
     }
-    if (!form.firstName || !form.lastName || !form.workEmail) {
-      alert("Admin user first name, last name and email are required.");
-      return;
-    }
+
+    setFormErrors([]);
     try {
       await createAdminCompany({
-        name: form.companyName,
+        name: form.companyName.trim(),
         subscriptionPlan: (form.plan || "STARTER").toUpperCase(),
-        pocEmail: form.workEmail || undefined,
-        legalName: form.companyName || undefined,
-        commercialRegistrationNumber: form.regNo || undefined,
+        pocEmail: form.workEmail.trim() || undefined,
+        legalName: form.regNo.trim() ? form.companyName.trim() : undefined,
+        commercialRegistrationNumber: form.regNo.trim() || undefined,
         headquarterAddress:
           [form.city, form.state, form.country].filter(Boolean).join(", ") ||
           undefined,
-        employeeCount: undefined,
-        revenueAmount: form.revenue || undefined,
+        employeeCount: form.employees
+          ? parseInt(form.employees.replace(/\D/g, "")) || undefined
+          : undefined,
         pocFullName: `${form.firstName} ${form.lastName}`.trim() || undefined,
         adminUser: {
-          email: form.workEmail,
+          email: form.workEmail.trim(),
           password: form.password,
-          firstName: form.firstName,
-          lastName: form.lastName,
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
         },
       });
+
+      alert(
+        "Company created successfully! Note: The admin user must change their password on first login.",
+      );
       navigate("/companies");
-    } catch (err: any) {
-      alert(err.message || "Failed to create company.");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to create company.";
+      if (message.includes("already registered") || message.includes("409")) {
+        setEmailError(
+          "This email is already registered. Please use a different email.",
+        );
+        setCurrentStep(2);
+      } else {
+        setFormErrors(message.split(",").map((e) => e.trim()));
+      }
     }
   };
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-center">
+          <p className="text-slate-800 font-bold text-sm mb-2">Access Denied</p>
+          <p className="text-slate-400 text-xs">
+            Only Super Admins can add companies.
+          </p>
+          <Link
+            to="/companies"
+            className="mt-4 inline-block text-teal-600 text-xs font-bold"
+          >
+            Go Back
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50/30 space-y-6">
@@ -255,6 +309,15 @@ const AddCompany = () => {
         </Link>
       </div>
 
+      {formErrors.length > 0 && (
+        <div className="bg-rose-50 border border-rose-100 rounded-xl p-4">
+          {formErrors.map((e, i) => (
+            <p key={i} className="text-rose-600 text-[12px]">
+              {e}
+            </p>
+          ))}
+        </div>
+      )}
       <Stepper currentStep={currentStep} />
 
       {currentStep === 1 && (
@@ -482,8 +545,14 @@ const AddCompany = () => {
                 placeholder="admin@company.com"
                 type="email"
                 value={form.workEmail}
-                onChange={set("workEmail")}
+                onChange={(v) => {
+                  set("workEmail")(v);
+                  setEmailError("");
+                }}
               />
+              {emailError && (
+                <p className="text-rose-500 text-[11px] mt-1">{emailError}</p>
+              )}
             </div>
             <div>
               <Label text="Phone" />
@@ -539,7 +608,6 @@ const AddCompany = () => {
               { label: "Employees", value: form.employees },
               { label: "Admin First Name", value: form.firstName || "—" },
               { label: "Admin Last Name", value: form.lastName || "—" },
-              { label: "Admin Email", value: form.workEmail || "—" },
               { label: "Plan", value: form.plan },
             ].map(({ label, value }) => (
               <div
@@ -578,7 +646,7 @@ const AddCompany = () => {
         ) : (
           <button
             onClick={handleSubmit}
-            className="flex items-center gap-2 px-6 py-2.5 bg-teal-600..."
+            className="flex items-center gap-2 px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-[12px] font-bold shadow-sm transition-all"
           >
             Submit <ArrowRight size={14} />
           </button>

@@ -146,7 +146,7 @@ const CompanyProfile = () => {
 
     setSuspending(true);
     try {
-      const res = await api.patch(`/orgs/${id}/status`, {
+      await api.patch(`/orgs/${id}/status`, {
         isActive: !isActive,
         reason: `${action}d via admin dashboard`,
       });
@@ -416,24 +416,53 @@ const CompanyProfile = () => {
           </div>
         )}
 
-        {activeTab === "Subscription" && (
-          <div className="p-5 max-w-md">
-            <div className="divide-y divide-slate-100">
-              {[
-                { label: "Plan", value: p.plan || p.subscriptionPlan || "—" },
-                { label: "Status", value: p.subscriptionStatus || "—" },
-                { label: "Billing Cycle", value: "Monthly" },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between py-3">
-                  <span className="text-[12px] text-slate-400">{label}</span>
-                  <span className="text-[12px] font-bold text-slate-800">
-                    {value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      {activeTab === "Subscription" && (
+  <div className="p-5 max-w-md space-y-4">
+    <div className="divide-y divide-slate-100">
+      {[
+        { label: "Plan", value: p.plan || p.subscriptionPlan || "—" },
+        { label: "Status", value: p.subscriptionStatus || "—" },
+        { label: "Billing Cycle", value: "Monthly" },
+        { label: "Trial Ends", value: p.subscriptionExpiry ? new Date(p.subscriptionExpiry).toLocaleDateString() : "—" },
+      ].map(({ label, value }) => (
+        <div key={label} className="flex justify-between py-3">
+          <span className="text-[12px] text-slate-400">{label}</span>
+          <span className="text-[12px] font-bold text-slate-800">{value}</span>
+        </div>
+      ))}
+    </div>
+
+    <div className="flex gap-2 pt-2">
+      <button
+        onClick={() => {
+          const plans = ["STARTER", "PROFESSIONAL", "ENTERPRISE"];
+          const newPlan = prompt(`Change plan (${plans.join(" / ")}):`)?.toUpperCase();
+          if (!newPlan || !plans.includes(newPlan)) return;
+          api.patch(`/orgs/${id}/subscription`, { subscriptionPlan: newPlan })
+            .then(() => setOrgData((prev: any) => ({ ...prev, plan: newPlan, subscriptionPlan: newPlan })))
+            .catch(() => alert("Failed to update plan."));
+        }}
+        className="px-4 py-2 border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50"
+      >
+        Change Plan
+      </button>
+
+      <button
+        onClick={() => {
+          const statuses = ["TRIAL", "ACTIVE", "SUSPENDED", "CANCELLED", "EXPIRED"];
+          const newStatus = prompt(`Change status (${statuses.join(" / ")}):`)?.toUpperCase();
+          if (!newStatus || !statuses.includes(newStatus)) return;
+          api.patch(`/orgs/${id}/subscription`, { subscriptionStatus: newStatus })
+            .then(() => setOrgData((prev: any) => ({ ...prev, subscriptionStatus: newStatus })))
+            .catch(() => alert("Failed to update status."));
+        }}
+        className="px-4 py-2 border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50"
+      >
+        Change Status
+      </button>
+    </div>
+  </div>
+)}
 
         {activeTab === "Activity Log" && (
           <div className="p-5">
